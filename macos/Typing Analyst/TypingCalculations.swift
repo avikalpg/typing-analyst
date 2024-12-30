@@ -7,44 +7,42 @@
 
 import Foundation
 
-struct TypingCalculations { // Putting the functions inside a struct is also a good practice
-    static func calculateWPM(from keystrokes: [Keystroke]) -> Double {
-        guard keystrokes.count > 0 else { return 0 }
+struct TypingCalculations {
+    static func calculateWPM(from keystrokes: [Keystroke], in timeWindow: TimeInterval) -> Double {
+        guard !keystrokes.isEmpty else { return 0 }
 
-        let startTime = keystrokes.first!.timestamp
-        let endTime = keystrokes.last!.timestamp
-        let timeInterval = endTime.timeIntervalSince(startTime)
+        let now = Date()
+        let relevantKeystrokes = keystrokes.filter { now.timeIntervalSince($0.timestamp) <= timeWindow }
 
-        guard timeInterval > 0 else { return 0 }
-
-        let words = keystrokes.reduce(0) { (count, keystroke) -> Int in
+        guard !relevantKeystrokes.isEmpty else { return 0 }
+        
+        let words = relevantKeystrokes.reduce(0) { (count, keystroke) -> Int in
             if keystroke.characters == " " {
                 return count + 1
             }
             return count
         }
 
-        let wpm = Double(words) / (timeInterval / 60.0)
+        let wpm = Double(words) / (timeWindow / 60.0) // Words per minute
         return wpm
     }
 
-    static func calculateCPM(from keystrokes: [Keystroke]) -> Double {
-        guard keystrokes.count > 0 else { return 0 }
+    static func calculateCPM(from keystrokes: [Keystroke], in timeWindow: TimeInterval) -> Double {
+        guard !keystrokes.isEmpty else { return 0 }
 
-        let startTime = keystrokes.first!.timestamp
-        let endTime = keystrokes.last!.timestamp
-        let timeInterval = endTime.timeIntervalSince(startTime)
+        let now = Date()
+        let relevantKeystrokes = keystrokes.filter { now.timeIntervalSince($0.timestamp) <= timeWindow }
+        
+        guard !relevantKeystrokes.isEmpty else { return 0 }
 
-        guard timeInterval > 0 else { return 0 }
-
-        let characters = keystrokes.reduce(0) { (count, keystroke) -> Int in
+        let characters = relevantKeystrokes.reduce(0) { (count, keystroke) -> Int in
             if let charCount = keystroke.characters?.count {
                 return count + charCount
             }
             return count
         }
 
-        let cpm = Double(characters) / (timeInterval / 60.0)
+        let cpm = Double(characters) / (timeWindow / 60.0) // Characters per minute
         return cpm
     }
 

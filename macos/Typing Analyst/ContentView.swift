@@ -13,22 +13,37 @@ struct ContentView: View {
     @State private var hasAppeared = false
     @State private var keystrokes: [Keystroke] = []
 
+    // Implement time window and refresh rate
+    @State private var wpm: Double = 0
+    @State private var cpm: Double = 0
+    @State private var accuracy: Double = 0
+    let timeWindow: TimeInterval = 10 // Time window in seconds
+    let timer = Timer.publish(every: 0.5, on: .main, in: .common).autoconnect()
+
     var body: some View {
         VStack {
-            Text("WPM: \(TypingCalculations.calculateWPM(from: keystrokes), format: .number.precision(.fractionLength(2)))")
-            Text("CPM: \(TypingCalculations.calculateCPM(from: keystrokes), format: .number.precision(.fractionLength(2)))")
-            Text("Accuracy: \(TypingCalculations.calculateAccuracy(from: keystrokes), format: .number.precision(.fractionLength(2)))%")
+            Text("WPM: \(wpm, format: .number.precision(.fractionLength(2)))")
+            Text("CPM: \(cpm, format: .number.precision(.fractionLength(2)))")
+            Text("Accuracy: \(accuracy, format: .number.precision(.fractionLength(2)))%")
         }
             .padding()
             .onAppear {
-                startGlobalKeyCapture()
+                hasAppeared = true
+                if globalMonitor == nil {
+                    startGlobalKeyCapture()
+                }
             }
             .onDisappear {
                 stopGlobalKeyCapture()
             }
+            .onReceive(timer) { _ in // Update speed on timer events
+                updateSpeedAndAccuracy()
+            }
     }
 
     func startGlobalKeyCapture() {
+        guard hasAppeared else { return }
+
         let eventMask = NSEvent.EventTypeMask.keyDown
 
         localMonitor = NSEvent.addLocalMonitorForEvents(matching: eventMask) { event in
@@ -57,7 +72,7 @@ struct ContentView: View {
             print("Key is being repeated. Ignoring.")
             return
         }
-        
+
         let modifierFlags = event.modifierFlags
         var modifiers = ""
 
@@ -66,7 +81,7 @@ struct ContentView: View {
         if modifierFlags.contains(.option) { modifiers += "Option+" }
         if modifierFlags.contains(.command) { modifiers += "Command+" }
 
-        
+
         let keystroke = Keystroke(
             timestamp: Date(),
             characters: event.characters,
@@ -74,6 +89,12 @@ struct ContentView: View {
             modifiers: modifiers
         )
         keystrokes.append(keystroke)
-        print("keystrokes: \(keystrokes)")
+        // print("keystrokes: \(keystrokes)")
+    }
+
+    func updateSpeedAndAccuracy() {
+        wpm = TypingCalculations.calculateWPM(from: keystrokes, in: timeWindow)
+        cpm = TypingCalculations.calculateCPM(from: keystrokes, in: timeWindow)
+        accuracy = TypingCalculations.calculateAccuracy(from: keystrokes)
     }
 }
