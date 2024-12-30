@@ -14,7 +14,11 @@ struct ContentView: View {
     @State private var keystrokes: [Keystroke] = []
 
     var body: some View {
-        Text("Keystroke Monitor Running")
+        VStack {
+            Text("WPM: \(TypingCalculations.calculateWPM(from: keystrokes), format: .number.precision(.fractionLength(2)))")
+            Text("CPM: \(TypingCalculations.calculateCPM(from: keystrokes), format: .number.precision(.fractionLength(2)))")
+            Text("Accuracy: \(TypingCalculations.calculateAccuracy(from: keystrokes), format: .number.precision(.fractionLength(2)))%")
+        }
             .padding()
             .onAppear {
                 startGlobalKeyCapture()
