@@ -95,6 +95,6 @@ struct ContentView: View {
     func updateSpeedAndAccuracy() {
         wpm = TypingCalculations.calculateWPM(from: keystrokes, in: timeWindow)
         cpm = TypingCalculations.calculateCPM(from: keystrokes, in: timeWindow)
-        accuracy = TypingCalculations.calculateAccuracy(from: keystrokes)
+        accuracy = TypingCalculations.calculateAccuracy(from: keystrokes, in: timeWindow)
     }
 }

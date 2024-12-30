@@ -46,22 +46,45 @@ struct TypingCalculations {
         return cpm
     }
 
-    static func calculateAccuracy(from keystrokes: [Keystroke]) -> Double {
-        guard keystrokes.count > 0 else { return 0 }
+    static func calculateAccuracy(from keystrokes: [Keystroke], in timeWindow: TimeInterval) -> Double {
+        guard !keystrokes.isEmpty else { return 100.0 } // 100% if no input
 
-        var errors = 0
-        var corrections = 0
+        let now = Date()
+        let relevantKeystrokes = keystrokes.filter { now.timeIntervalSince($0.timestamp) <= timeWindow }
 
-        for (index, keystroke) in keystrokes.enumerated() {
-            if keystroke.keyCode == 51 {
-                errors += 1
-                if index > 0 {
-                    corrections += 1
+        guard !relevantKeystrokes.isEmpty else { return 100.0 }
+
+        var correctCharacters = 0
+        var totalCharacters = 0
+
+        var currentString = ""
+
+        for keystroke in relevantKeystrokes {
+            if let characters = keystroke.characters {
+                if keystroke.keyCode == 51 {
+                    if !currentString.isEmpty {
+                        currentString.removeLast()
+                    }
+                } else {
+                    currentString.append(characters)
                 }
             }
         }
+        
+        totalCharacters = relevantKeystrokes.reduce(0) { (count, keystroke) -> Int in
+            if let charCount = keystroke.characters?.count, keystroke.keyCode != 51 {
+                return count + charCount
+            }
+            return count
+        }
+        
+        correctCharacters = currentString.count
+        
+        if totalCharacters == 0 {
+            return 100.0
+        }
 
-        let accuracy = Double(keystrokes.count - errors + corrections) / Double(keystrokes.count) * 100
+        let accuracy = Double(correctCharacters) / Double(totalCharacters) * 100
         return accuracy
     }
 }
