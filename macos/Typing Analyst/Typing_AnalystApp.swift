@@ -9,9 +9,13 @@ import SwiftUI
 
 @main
 struct Typing_AnalystApp: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
+    @StateObject var viewModel = ViewModel()
+
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(viewModel)
         }
     }
 }
