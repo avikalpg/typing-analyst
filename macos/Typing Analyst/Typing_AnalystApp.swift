@@ -13,9 +13,8 @@ struct Typing_AnalystApp: App {
     @StateObject var viewModel = ViewModel()
 
     var body: some Scene {
-        WindowGroup {
-            ContentView()
-                .environmentObject(viewModel)
+        Settings {
+            EmptyView()
         }
     }
 }
