@@ -10,6 +10,8 @@ import SwiftUI
 struct ContentView: View {
     @State private var localMonitor: Any?
     @State private var globalMonitor: Any?
+    @State private var hasAppeared = false
+    @State private var keystrokes: [Keystroke] = []
 
     var body: some View {
         Text("Keystroke Monitor Running")
@@ -25,13 +27,12 @@ struct ContentView: View {
     func startGlobalKeyCapture() {
         let eventMask = NSEvent.EventTypeMask.keyDown
 
-        localMonitor = NSEvent.addLocalMonitorForEvents(matching: eventMask) { (event) -> NSEvent? in
+        localMonitor = NSEvent.addLocalMonitorForEvents(matching: eventMask) { event in
             handle(event: event, source: "local")
             return event
         }
 
-        print("TEST print statement for global monitor")
-        globalMonitor = NSEvent.addGlobalMonitorForEvents(matching: eventMask) { (event) in
+        globalMonitor = NSEvent.addGlobalMonitorForEvents(matching: eventMask) { event in
             handle(event: event, source: "global")
         }
     }
@@ -39,16 +40,36 @@ struct ContentView: View {
     func stopGlobalKeyCapture() {
         if let localMonitor = localMonitor {
             NSEvent.removeMonitor(localMonitor)
-            self.localMonitor = nil // Now this works
+            self.localMonitor = nil
         }
         if let globalMonitor = globalMonitor {
             NSEvent.removeMonitor(globalMonitor)
-            self.globalMonitor = nil // Now this works
+            self.globalMonitor = nil
         }
     }
 
     func handle(event: NSEvent, source: String) {
-        guard let characters = event.charactersIgnoringModifiers else { return }
-        print("\(source) Key pressed: \(characters)")
+        if event.isARepeat {
+            print("Key is being repeated. Ignoring.")
+            return
+        }
+        
+        let modifierFlags = event.modifierFlags
+        var modifiers = ""
+
+        if modifierFlags.contains(.shift) { modifiers += "Shift+" }
+        if modifierFlags.contains(.control) { modifiers += "Control+" }
+        if modifierFlags.contains(.option) { modifiers += "Option+" }
+        if modifierFlags.contains(.command) { modifiers += "Command+" }
+
+        
+        let keystroke = Keystroke(
+            timestamp: Date(),
+            characters: event.characters,
+            keyCode: event.keyCode,
+            modifiers: modifiers
+        )
+        keystrokes.append(keystroke)
+        print("keystrokes: \(keystrokes)")
     }
 }
