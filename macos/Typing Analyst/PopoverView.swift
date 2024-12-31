@@ -22,9 +22,15 @@ struct PopoverView: View {
                 Text("1 Hour").tag(TimeInterval(60 * 60))
             }
             .pickerStyle(.segmented)
-            chart(data: viewModel.wpmData, label: "WPM", yRange: 0...150)
-//            chart(data: viewModel.cpmData, label: "CPM", yRange: 0...500)
-            chart(data: viewModel.accuracyData, label: "Accuracy", yRange: 0...100)
+            if viewModel.preferences.showWPMChart {
+                chart(data: viewModel.wpmData, label: "WPM", yRange: 0...150)
+            }
+            if viewModel.preferences.showCPMChart {
+                chart(data: viewModel.cpmData, label: "CPM", yRange: 0...500)
+            }
+            if viewModel.preferences.showAccuracyChart {
+                chart(data: viewModel.accuracyData, label: "Accuracy", yRange: 0...100)
+            }
         }
         .padding()
     }

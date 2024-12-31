@@ -11,19 +11,16 @@ import Combine
 class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem!
     private var popover: NSPopover!
-    private var viewModel: ViewModel! // Store a reference to the ViewModel
+    var viewModel: ViewModel! // Store a reference to the ViewModel
     @State private var globalMonitor: Any?
+    var preferences: AppPreferences = .load()
 
     // Implement time window and refresh rate
     @State private var wpm: Double = 0
     @State private var cpm: Double = 0
     @State private var accuracy: Double = 0
-    let timeWindow: TimeInterval = 10 // Time window in seconds
-    let timer = Timer.publish(every: 0.5, on: .main, in: .common).autoconnect()
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
-        viewModel = ViewModel()
-
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         if let button = statusItem.button {
             button.image = NSImage(systemSymbolName: "keyboard", accessibilityDescription: "Typing Analyst")
@@ -32,15 +29,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         
         popover = NSPopover()
-        popover.contentViewController = NSHostingController(rootView: PopoverView(viewModel: viewModel))
+        popover.contentViewController = NSHostingController(rootView: PopoverView(viewModel: self.viewModel))
         popover.behavior = .transient
 
         startGlobalKeyCapture()
 
         // Observe changes in the ViewModel to update the status bar
-        viewModel.$wpm.sink { [weak self] _ in self?.updateStatusBar() }.store(in: &viewModel.cancellables)
-        viewModel.$cpm.sink { [weak self] _ in self?.updateStatusBar() }.store(in: &viewModel.cancellables)
-        viewModel.$accuracy.sink { [weak self] _ in self?.updateStatusBar() }.store(in: &viewModel.cancellables)
+        self.viewModel.$wpm.sink { [weak self] _ in self?.updateStatusBar() }.store(in: &self.viewModel.cancellables)
+        self.viewModel.$cpm.sink { [weak self] _ in self?.updateStatusBar() }.store(in: &self.viewModel.cancellables)
+        self.viewModel.$accuracy.sink { [weak self] _ in self?.updateStatusBar() }.store(in: &self.viewModel.cancellables)
     }
 
     func applicationWillTerminate(_ notification: Notification) {
@@ -54,7 +51,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             popover.performClose(sender)
         } else {
             popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
-            popover.contentViewController = NSHostingController(rootView: PopoverView(viewModel: viewModel)) // Ensure view model is passed
+            popover.contentViewController = NSHostingController(rootView: PopoverView(viewModel: self.viewModel)) // Ensure view model is passed
             NSApp.activate(ignoringOtherApps: true)
         }
     }
@@ -63,9 +60,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let buttonToUpdate = button ?? statusItem.button
         guard let button = buttonToUpdate else { return }
 
-        let wpmString = String(format: "%.0f WPM", viewModel.wpm)
-        let cpmString = String(format: "%.0f CPM", viewModel.cpm)
-        let accuracyString = String(format: "%.0f%%", viewModel.accuracy)
+        let wpmString = String(format: "%.0f WPM", self.viewModel.wpm)
+        let cpmString = String(format: "%.0f CPM", self.viewModel.cpm)
+        let accuracyString = String(format: "%.0f%%", self.viewModel.accuracy)
 
         button.title = "\(wpmString) | \(cpmString) | \(accuracyString)"
     }
@@ -107,6 +104,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             keyCode: event.keyCode,
             modifiers: modifiers
         )
-        viewModel.addKeystroke(keystroke: keystroke)
-    }
+        self.viewModel.addKeystroke(keystroke: keystroke)
+    } 
 }

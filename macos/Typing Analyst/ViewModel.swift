@@ -10,10 +10,8 @@ import Foundation
 import Combine
 
 class ViewModel: ObservableObject {
-    let updateFrequency: TimeInterval = 0.5 // Update every 0.5 seconds
-    let timeWindow: TimeInterval = 10
-    let chartTimeWindow: TimeInterval = 60 * 60 * 24 // Store data for 24 hours
-    lazy var chartDataCapacity: Int = Int(chartTimeWindow / updateFrequency)
+    var preferences: AppPreferences
+    lazy var chartDataCapacity: Int = Int(preferences.chartTimeWindow / preferences.updateFrequency)
     private var lastUpdate: Date?
     
     @Published var wpm: Double = 0
@@ -26,8 +24,10 @@ class ViewModel: ObservableObject {
     @Published var wpmData: [(x: Date, y: Double)] = []
     @Published var cpmData: [(x: Date, y: Double)] = []
     @Published var accuracyData: [(x: Date, y: Double)] = []
+    
 
-    init() {
+    init(preferences: AppPreferences) {
+        self.preferences = preferences
         startTimer()
     }
 
@@ -35,8 +35,14 @@ class ViewModel: ObservableObject {
         cancellables.forEach { $0.cancel() }
     }
 
+    func updatePreferences() {
+        chartDataCapacity = Int(preferences.chartTimeWindow / preferences.updateFrequency)
+        cancellables.forEach{ $0.cancel() }
+        startTimer()
+    }
+    
     func startTimer() {
-        Timer.publish(every: updateFrequency, on: .main, in: .common)
+        Timer.publish(every: preferences.updateFrequency, on: .main, in: .common)
             .autoconnect()
             .sink { [weak self] _ in
                 self?.update()
@@ -49,12 +55,12 @@ class ViewModel: ObservableObject {
     }
     
     func update() {
-        guard lastUpdate == nil || Date().timeIntervalSince(lastUpdate!) >= updateFrequency else { return }
+        guard lastUpdate == nil || Date().timeIntervalSince(lastUpdate!) >= preferences.updateFrequency else { return }
         lastUpdate = Date()
         
-        wpm = TypingCalculations.calculateWPM(from: keystrokes, in: timeWindow)
-        cpm = TypingCalculations.calculateCPM(from: keystrokes, in: timeWindow)
-        accuracy = TypingCalculations.calculateAccuracy(from: keystrokes, in: timeWindow)
+        wpm = TypingCalculations.calculateWPM(from: keystrokes, in: preferences.dataTimeWindow)
+        cpm = TypingCalculations.calculateCPM(from: keystrokes, in: preferences.dataTimeWindow)
+        accuracy = TypingCalculations.calculateAccuracy(from: keystrokes, in: preferences.dataTimeWindow)
         
         let now = Date()
         appendWithCapacity(&wpmData, (x: now, y: wpm))
