@@ -11,39 +11,49 @@ import Combine
 class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem!
     private var popover: NSPopover!
-    var viewModel: ViewModel! // Store a reference to the ViewModel
+    var viewModel: ViewModel!
     @State private var globalMonitor: Any?
     var preferences: AppPreferences = .load()
 
-    // Implement time window and refresh rate
     @State private var wpm: Double = 0
     @State private var cpm: Double = 0
     @State private var accuracy: Double = 0
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
-        statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
-        if let button = statusItem.button {
-            button.image = NSImage(systemSymbolName: "keyboard", accessibilityDescription: "Typing Analyst")
-            button.action = #selector(togglePopover(_:)) // Set the action
-            updateStatusBar(button: button) // Initial update
-        }
-        
-        popover = NSPopover()
-        popover.contentViewController = NSHostingController(rootView: PopoverView(viewModel: self.viewModel))
-        popover.behavior = .transient
-
+        setupStatusItem()
+        setupPopover()
         startGlobalKeyCapture()
-
-        // Observe changes in the ViewModel to update the status bar
-        self.viewModel.$wpm.sink { [weak self] _ in self?.updateStatusBar() }.store(in: &self.viewModel.cancellables)
-        self.viewModel.$cpm.sink { [weak self] _ in self?.updateStatusBar() }.store(in: &self.viewModel.cancellables)
-        self.viewModel.$accuracy.sink { [weak self] _ in self?.updateStatusBar() }.store(in: &self.viewModel.cancellables)
+        setupObservers()
     }
 
     func applicationWillTerminate(_ notification: Notification) {
         stopGlobalKeyCapture()
     }
-    
+
+    private func setupStatusItem() {
+        statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+        if let button = statusItem.button {
+            button.image = NSImage(systemSymbolName: "keyboard", accessibilityDescription: "Typing Analyst")
+            button.action = #selector(togglePopover(_:))
+            updateStatusBar(button: button)
+        }
+    }
+
+    private func setupPopover() {
+        popover = NSPopover()
+        popover.contentViewController = NSHostingController(rootView: PopoverView(viewModel: viewModel))
+        popover.behavior = .transient
+    }
+
+    private func setupObservers() {
+        viewModel.$wpm.sink { [weak self] _ in self?.updateStatusBar() }
+            .store(in: &viewModel.cancellables)
+        viewModel.$cpm.sink { [weak self] _ in self?.updateStatusBar() }
+            .store(in: &viewModel.cancellables)
+        viewModel.$accuracy.sink { [weak self] _ in self?.updateStatusBar() }
+            .store(in: &viewModel.cancellables)
+    }
+
     @objc func togglePopover(_ sender: Any?) {
         guard let button = statusItem.button else { return }
 
@@ -51,7 +61,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             popover.performClose(sender)
         } else {
             popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
-            popover.contentViewController = NSHostingController(rootView: PopoverView(viewModel: self.viewModel)) // Ensure view model is passed
+            popover.contentViewController = NSHostingController(rootView: PopoverView(viewModel: viewModel))
             NSApp.activate(ignoringOtherApps: true)
         }
     }
@@ -60,19 +70,27 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let buttonToUpdate = button ?? statusItem.button
         guard let button = buttonToUpdate else { return }
 
-        let wpmString = String(format: "%.0f WPM", self.viewModel.wpm)
-        let cpmString = String(format: "%.0f CPM", self.viewModel.cpm)
-        let accuracyString = String(format: "%.0f%%", self.viewModel.accuracy)
+        var statusComponents: [String] = []
 
-        button.title = "\(wpmString) | \(cpmString) | \(accuracyString)"
+        if viewModel.preferences.showWPMChart {
+            statusComponents.append(String(format: "%.0f WPM", viewModel.wpm))
+        }
+
+        if viewModel.preferences.showCPMChart {
+            statusComponents.append(String(format: "%.0f CPM", viewModel.cpm))
+        }
+
+        if viewModel.preferences.showAccuracyChart {
+            statusComponents.append(String(format: "%.0f%%", viewModel.accuracy))
+        }
+
+        button.title = statusComponents.joined(separator: " | ")
     }
 
     func startGlobalKeyCapture() {
         let eventMask = NSEvent.EventTypeMask.keyDown
-
         globalMonitor = NSEvent.addGlobalMonitorForEvents(matching: eventMask) { [weak self] event in
-            guard let self = self else { return }
-            self.handle(event: event)
+            self?.handle(event: event)
         }
     }
 
@@ -84,7 +102,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func handle(event: NSEvent) {
-        if event.isARepeat {
+        guard !event.isARepeat else {
             print("Key is being repeated. Ignoring.")
             return
         }
@@ -97,13 +115,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if modifierFlags.contains(.option) { modifiers += "Option+" }
         if modifierFlags.contains(.command) { modifiers += "Command+" }
 
-
         let keystroke = Keystroke(
             timestamp: Date(),
             characters: event.characters,
             keyCode: event.keyCode,
             modifiers: modifiers
         )
-        self.viewModel.addKeystroke(keystroke: keystroke)
-    } 
+        viewModel.addKeystroke(keystroke: keystroke)
+    }
 }
