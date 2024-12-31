@@ -17,6 +17,11 @@ class ViewModel: ObservableObject {
     let timeWindow: TimeInterval = 10
     var cancellables = Set<AnyCancellable>() // Store cancellables
 
+    // for adding graph over time
+    @Published var wpmData: [(x: Date, y: Double)] = []
+    @Published var cpmData: [(x: Date, y: Double)] = []
+    @Published var accuracyData: [(x: Date, y: Double)] = []
+
     init() {
         startTimer()
     }
@@ -42,5 +47,10 @@ class ViewModel: ObservableObject {
         wpm = TypingCalculations.calculateWPM(from: keystrokes, in: timeWindow)
         cpm = TypingCalculations.calculateCPM(from: keystrokes, in: timeWindow)
         accuracy = TypingCalculations.calculateAccuracy(from: keystrokes, in: timeWindow)
+        
+        let now = Date()
+        wpmData.append((x: now, y: wpm))
+        cpmData.append((x: now, y: cpm))
+        accuracyData.append((x: now, y: accuracy))
     }
 }

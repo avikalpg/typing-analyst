@@ -6,13 +6,53 @@
 //
 
 import SwiftUI
+import Charts
 
 struct PopoverView: View {
-    var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
-    }
-}
+    @ObservedObject var viewModel: ViewModel
 
-#Preview {
-    PopoverView()
+    var body: some View {
+        VStack {
+            Chart {
+                ForEach(viewModel.wpmData, id: \.x) { item in
+                    LineMark(x: .value("Time", item.x, unit: .second), y: .value("WPM", item.y))
+                }
+            }
+            .chartXAxis {
+                AxisMarks(position: .bottom, values: .stride(by: .second)) { value in
+                    AxisGridLine()
+                    AxisTick()
+                    AxisValueLabel(format: .dateTime.second(.defaultDigits))
+                }
+            }
+            .frame(height: 100)
+            Chart {
+                ForEach(viewModel.cpmData, id: \.x) { item in
+                    LineMark(x: .value("Time", item.x, unit: .second), y: .value("CPM", item.y))
+                }
+            }
+            .chartXAxis {
+                AxisMarks(position: .bottom, values: .stride(by: .second)) { value in
+                    AxisGridLine()
+                    AxisTick()
+                    AxisValueLabel(format: .dateTime.second(.defaultDigits))
+                }
+            }
+            .frame(height: 100)
+            Chart {
+                ForEach(viewModel.accuracyData, id: \.x) { item in
+                    LineMark(x: .value("Time", item.x, unit: .second), y: .value("Accuracy", item.y))
+                }
+            }
+            .chartXAxis {
+                AxisMarks(position: .bottom, values: .stride(by: .second)) { value in
+                    AxisGridLine()
+                    AxisTick()
+                    AxisValueLabel(format: .dateTime.second(.defaultDigits))
+                }
+            }
+            .frame(height: 100)
+        }
+        .padding()
+    }
 }

@@ -10,8 +10,8 @@ import Combine
 
 class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem!
+    private var popover: NSPopover!
     private var viewModel: ViewModel! // Store a reference to the ViewModel
-
     @State private var globalMonitor: Any?
 
     // Implement time window and refresh rate
@@ -26,8 +26,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         if let button = statusItem.button {
+            button.image = NSImage(systemSymbolName: "keyboard", accessibilityDescription: "Typing Analyst")
+            button.action = #selector(togglePopover(_:)) // Set the action
             updateStatusBar(button: button) // Initial update
         }
+        
+        popover = NSPopover()
+        popover.contentViewController = NSHostingController(rootView: PopoverView(viewModel: viewModel))
+        popover.behavior = .transient
 
         startGlobalKeyCapture()
 
@@ -39,6 +45,18 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationWillTerminate(_ notification: Notification) {
         stopGlobalKeyCapture()
+    }
+    
+    @objc func togglePopover(_ sender: Any?) {
+        guard let button = statusItem.button else { return }
+
+        if popover.isShown {
+            popover.performClose(sender)
+        } else {
+            popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+            popover.contentViewController = NSHostingController(rootView: PopoverView(viewModel: viewModel)) // Ensure view model is passed
+            NSApp.activate(ignoringOtherApps: true)
+        }
     }
 
     private func updateStatusBar(button: NSStatusBarButton? = nil) {
