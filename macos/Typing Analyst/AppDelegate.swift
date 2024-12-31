@@ -19,6 +19,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @State private var wpm: Double = 0
     @State private var cpm: Double = 0
     @State private var accuracy: Double = 0
+    
+    private var _cancellables: Set<AnyCancellable> = []
+    var cancellables: Set<AnyCancellable> {
+        get { _cancellables }
+        set { _cancellables = newValue }
+    }
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
@@ -35,13 +41,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         startGlobalKeyCapture()
 
         // Observe changes in the ViewModel to update the status bar
-        self.viewModel.$wpm.sink { [weak self] _ in self?.updateStatusBar() }.store(in: &self.viewModel.cancellables)
-        self.viewModel.$cpm.sink { [weak self] _ in self?.updateStatusBar() }.store(in: &self.viewModel.cancellables)
-        self.viewModel.$accuracy.sink { [weak self] _ in self?.updateStatusBar() }.store(in: &self.viewModel.cancellables)
+        self.viewModel.$wpm.sink { [weak self] _ in self?.updateStatusBar() }.store(in: &cancellables)
+        self.viewModel.$cpm.sink { [weak self] _ in self?.updateStatusBar() }.store(in: &cancellables)
+        self.viewModel.$accuracy.sink { [weak self] _ in self?.updateStatusBar() }.store(in: &cancellables)
     }
 
     func applicationWillTerminate(_ notification: Notification) {
         stopGlobalKeyCapture()
+        _cancellables.forEach { $0.cancel() }
     }
     
     @objc func togglePopover(_ sender: Any?) {
