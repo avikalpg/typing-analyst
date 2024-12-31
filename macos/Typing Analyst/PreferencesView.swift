@@ -15,24 +15,33 @@ struct PreferencesView: View {
         Form {
             VStack(spacing: 15) {
                 HStack {
-                    Text("Update Frequency (seconds)")
+                    Text("Update Frequency")
+                    Image(systemName: "info.circle")
+                        .help("How often the charts and statistics are updated. Lower values provide more frequent updates but may use more system resources.")
                     TextField("", value: $preferences.updateFrequency, format: .number)
                         .multilineTextAlignment(.center)
                         .frame(width: 100)
+                    Text("seconds")
                 }
 
                 HStack {
-                    Text("Data Time Window (seconds)")
+                    Text("Measurement Time Window")
+                    Image(systemName: "info.circle")
+                        .help("The rolling window of time within which your WPM, CPM and accuracy are measured, i.e. your typing performance of the last X seconds.")
                     TextField("", value: $preferences.dataTimeWindow, format: .number)
                         .multilineTextAlignment(.center)
                         .frame(width: 100)
+                    Text("seconds")
                 }
 
                 HStack {
-                    Text("Chart Time Window (seconds)")
+                    Text("Max Chart Time Window")
+                    Image(systemName: "info.circle")
+                        .help("The longest time period shown in the charts. Longer windows show more historical data.")
                     TextField("", value: $preferences.chartTimeWindow, format: .number)
                         .multilineTextAlignment(.center)
                         .frame(width: 100)
+                    Text("seconds")
                 }
 
                 VStack(alignment: .leading, spacing: 10) {
@@ -40,9 +49,21 @@ struct PreferencesView: View {
                         .font(.headline)
                         .padding(.top)
 
-                    Toggle("Show WPM Chart", isOn: $preferences.showWPMChart)
-                    Toggle("Show CPM Chart", isOn: $preferences.showCPMChart)
-                    Toggle("Show Accuracy Chart", isOn: $preferences.showAccuracyChart)
+                    HStack {
+                        Toggle("Show WPM Chart", isOn: $preferences.showWPMChart)
+                        Image(systemName: "info.circle")
+                            .help("Words Per Minute chart shows your typing speed over time")
+                    }
+                    HStack {
+                        Toggle("Show CPM Chart", isOn: $preferences.showCPMChart)
+                        Image(systemName: "info.circle")
+                            .help("Characters Per Minute chart shows your raw typing rate")
+                    }
+                    HStack {
+                        Toggle("Show Accuracy Chart", isOn: $preferences.showAccuracyChart)
+                        Image(systemName: "info.circle")
+                            .help("Accuracy chart shows the percentage of correctly typed characters")
+                    }
                 }
             }
             .frame(width: formWidth)
