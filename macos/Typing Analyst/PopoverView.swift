@@ -13,46 +13,53 @@ struct PopoverView: View {
 
     var body: some View {
         VStack {
-            Chart {
-                ForEach(viewModel.wpmData, id: \.x) { item in
-                    LineMark(x: .value("Time", item.x, unit: .second), y: .value("WPM", item.y))
-                }
-            }
-            .chartXAxis {
-                AxisMarks(position: .bottom, values: .stride(by: .second)) { value in
-                    AxisGridLine()
-                    AxisTick()
-                    AxisValueLabel(format: .dateTime.second(.defaultDigits))
-                }
-            }
-            .frame(height: 100)
-            Chart {
-                ForEach(viewModel.cpmData, id: \.x) { item in
-                    LineMark(x: .value("Time", item.x, unit: .second), y: .value("CPM", item.y))
-                }
-            }
-            .chartXAxis {
-                AxisMarks(position: .bottom, values: .stride(by: .second)) { value in
-                    AxisGridLine()
-                    AxisTick()
-                    AxisValueLabel(format: .dateTime.second(.defaultDigits))
-                }
-            }
-            .frame(height: 100)
-            Chart {
-                ForEach(viewModel.accuracyData, id: \.x) { item in
-                    LineMark(x: .value("Time", item.x, unit: .second), y: .value("Accuracy", item.y))
-                }
-            }
-            .chartXAxis {
-                AxisMarks(position: .bottom, values: .stride(by: .second)) { value in
-                    AxisGridLine()
-                    AxisTick()
-                    AxisValueLabel(format: .dateTime.second(.defaultDigits))
-                }
-            }
-            .frame(height: 100)
+            chart(data: viewModel.wpmData, label: "WPM", yRange: 0...150)
+            chart(data: viewModel.cpmData, label: "CPM", yRange: 0...500)
+            chart(data: viewModel.accuracyData, label: "Accuracy", yRange: 0...100)
         }
         .padding()
+    }
+
+    func chart(data: [(x: Date, y: Double)], label: String, yRange: ClosedRange<Double>) -> some View {
+        Chart {
+            ForEach(data, id: \.x) { item in
+                LineMark(x: .value("Time", item.x), y: .value(label, item.y))
+            }
+        }
+        .chartXScale(domain: .automatic)
+        .chartXAxis {
+            AxisMarks(position: .bottom) { value in
+                AxisGridLine()
+                AxisTick()
+
+                if let dateValue = value.as(Date.self) {
+                    let timeInterval = Date().timeIntervalSince(dateValue)
+                    var format: Date.FormatStyle {
+                        if timeInterval < 60 {
+                            return .dateTime.second(.defaultDigits)
+                        } else if timeInterval < 60 * 60 {
+                            return .dateTime.hour(.defaultDigits(amPM: .abbreviated)).minute(.defaultDigits).second(.defaultDigits)
+                        } else {
+                            return .dateTime.hour(.defaultDigits(amPM: .abbreviated)).minute(.defaultDigits)
+                        }
+                    }
+                    AxisValueLabel(format: format)
+                }
+            }
+            AxisMarks(position: .bottom, values: [data.first?.x ?? Date()]) { value in
+                if value.as(Date.self) != nil {
+                    AxisValueLabel(format: .dateTime.hour(.defaultDigits(amPM: .wide)).minute(.defaultDigits).second(.defaultDigits))
+                }
+            }
+        }
+        .chartYScale(domain: yRange)
+        .chartYAxis {
+            AxisMarks(position: .leading) { value in
+                AxisGridLine()
+                AxisTick()
+                AxisValueLabel(format: Decimal.FormatStyle.number.rounded(rule: .toNearestOrEven))
+            }
+        }
+        .frame(height: 150)
     }
 }
