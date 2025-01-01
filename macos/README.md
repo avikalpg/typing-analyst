@@ -1,5 +1,12 @@
 # Typing Analyst
 
+[![GitHub Stars](https://img.shields.io/github/stars/avikalpg/typing-analyst)](https://github.com/avikalpg/typing-analyst/stargazers)
+![Contributor activity](https://img.shields.io/github/commit-activity/y/avikalpg/typing-analyst)
+![App version](https://img.shields.io/github/v/release/avikalpg/typing-analyst
+)
+![App contributors](https://img.shields.io/github/contributors/avikalpg/typing-analyst)
+[![License](https://img.shields.io/badge/license-AGPLv3-purple)](https://github.com/avikalpg/typing-analyst/blob/main/LICENSE)
+
 A MacOS application for analyzing your typing speed, accuracy, and other key metrics.
 
 ## About
@@ -91,3 +98,9 @@ While Typing Analyst is open source under the GPLv3, I, Avikalp Gupta, retain th
 *   If you wish to distribute Typing Analyst under different terms (e.g., in a closed-source application or as part of a commercial product), you must obtain a separate commercial license from me.
 
 Please contact me at `avikalpgupta [at] gmail [dot] com` for inquiries regarding commercial licensing.
+
+## Contributors
+
+<a href="https://github.com/avikalpg/typing-analyst/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=avikalpg/typing-analyst" />
+</a>
