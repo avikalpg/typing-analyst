@@ -8,5 +8,13 @@
 	<string>This app requires access to monitor your keyboard input for typing analysis.</string>
 	<key>NSInputMonitoringUsageDescription</key>
 	<string>This application requires Input Monitoring permission to monitor keystrokes for measuring typing speed and accuracy. No personal data is collected or transmitted.</string>
+	<key>CFBundleName</key>
+	<string>Typing Analyst</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0.0</string>
+	<key>CFBundleVersion</key>
+	<string>1</string>
+	<key>NSHumanReadableCopyright</key>
+	<string>© 2025 Avikalp Gupta (assoc. Alokit Innovations Pvt Ltd)</string>
 </dict>
 </plist>
