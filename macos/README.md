@@ -1,24 +1,44 @@
-#  Typing Analyst
+# Typing Analyst
 
-This README file provides an overview of Typing Analyst MacOS application, including installation instructions, usage notes, and contribution guidelines.
+A MacOS application for analyzing your typing speed, accuracy, and other key metrics.
 
-##  Project Description
+## About
 
-Typing Analyst is a MacOS desktop application for typing utilities. Its features include measuring *typing speed*, *typing accuracy*, etc., independent of where you are typing.
+Typing Analyst helps you track your typing performance by providing real-time statistics and visualizations. It captures your keystrokes for this analysis independent of where you are typing.
 
-###  Features
+Usually, people only measure their typing speed by using standalone applications that give an example text to write. Because this does not emulate how people type in real-life, the output number is often misguiding and not actionable. Typing Analyst measures your typing speed when you naturally type:
 
-List the key features of your application.
+- Writing prompts on AI chat interfaces
+- Making edits in documents or code
+- Sending messages on IM, WhatsApp, Emails etc.
 
-##  Getting Started
+It's designed as a productivity tool for anyone who wants to improve their interaction with computers. Typing Analyst is especially useful for typing enthusiasts, freelance writers, coders, and typing trainers/educators.
+
+### Features
+
+*   Real-time WPM (Words Per Minute), CPM (Characters Per Minute), and Accuracy tracking.
+*   Visual graphs of your typing performance over time.
+*   Status bar display of key metrics.
+*   Preferences to customize data collection and display.
+
+## Getting Started
 
 ### System Requirements
-- List the minimum macOS version required to run the application.
-- Mention any other hardware or software dependencies (if applicable).
+- Minimum macOS version required to run the application: MacOS Ventura (13.0)
 
-### Installation
-1. Download the Application: You can download the pre-built application from [link to download location, if applicable].
-1. Double-click the `.app` file: This will copy the application to your Applications folder and launch it.
+### Installation (Important - Read Before Opening)
+
+This app is currently *not notarized* by Apple. Notarization is a process by which Apple checks your app for malicious content and other issues. This means you will likely see a security warning (Gatekeeper) when you first try to open it.
+
+This is because I'm an independent developer starting out and haven't yet enrolled in the Apple Developer Program (which is required for notarization, and is quite costly).
+
+To open the app:
+
+1.  Right-click (or Control-click) on the app icon.
+2.  Select "Open" from the context menu.
+3.  You'll see a dialog box. Click "Open" again to confirm.
+
+I plan to notarize the app in the future if there's sufficient interest.
 
 ###  Permissions (Important)
 
@@ -30,25 +50,44 @@ Here's how to do it:
 1. Go to "Privacy & Security".
 1. Select "Input Monitoring".
 1. Click the "+" button.
-1. Locate and select the application named "Typing Analyst" by searching it in the finder. If you are building the application yourself, it might be located in a directory similar to `~/Library/Developer/Xcode/DerivedData/[YourProjectName]/Build/Products/Debug/`.
+1. Locate and select the application named "Typing Analyst" by searching it in the finder.<br>*(If you are building the application yourself, it might be located in a directory similar to `~/Library/Developer/Xcode/DerivedData/[YourProjectName]/Build/Products/Debug/`.)*
 1. Click "Open" to grant the permission.
 
 ##  Usage
 
-[Provide clear instructions on how to use your application, including any specific steps or functionalities.]
+1.  **Launch the App:** After bypassing Gatekeeper (as described in the Installation section), launch Typing Analyst.
+2.  **Status Bar Icon:** An icon will appear in your macOS status bar. This icon displays your current WPM, CPM, and Accuracy.
+3.  **Popover Window:** Click the status bar icon to open a popover window. This window contains the graphs visualizing your typing performance.
+4.  **Preferences:** Access the app's preferences by clicking on "Typing Analyst" in the menu bar and selecting "Settings..." (or "Preferences..."). In the preferences window, you can:
+    *   Adjust the time window for the graphs.
+    *   Change the update frequency of the statistics.
+    *   Select which metrics to show.
+5.  **Tracking:** Typing Analyst automatically tracks your keystrokes in the background while the app is running. You don't need to do anything special to start or stop tracking.
+6. **Stopping the timer:** The timer is stopped automatically after a period of inactivity.
 
 ##  Contributing
 
-[If you plan to allow community contributions to your project, outline the process and guidelines for contributors.]
+Contributions are welcome! If you find a bug, have a feature request, or want to contribute code, please open an issue or submit a pull request on GitHub.
 
 ##  License
 
-[Specify the license under which your project is distributed. (e.g., MIT License, Apache License 2.0)]
+This project is licensed under the GNU General Public License v3.0.
 
-##  Contact
+A full copy of the license can be found in the `LICENSE` file included with this distribution or at [https://www.gnu.org/licenses/gpl-3.0.en.html](https://www.gnu.org/licenses/gpl-3.0.en.html).
 
-[Provide your contact information or a link to your support channel (if applicable).]
+In summary, the GPLv3:
 
-##  Additional Notes
+*   **Requires that derivative works are also licensed under the GPLv3.** This is the strong copyleft aspect. If someone modifies your code and distributes it, they must also release their modifications under the GPLv3.
+*   **Requires that source code is made available.** If you distribute binaries (compiled versions of your app), you must also provide access to the corresponding source code.
+*   **Protects users' freedom to use, study, share, and modify the software.**
 
-[Include any other relevant information about your project.]
+This license is chosen to ensure that any improvements or modifications to Typing Analyst remain open and accessible to the community.
+
+## Commercial Use and Monetization
+
+While Typing Analyst is open source under the GPLv3, I, Avikalp Gupta, retain the right to commercially distribute and license the application under different terms. This means:
+
+*   You are free to use, modify, and distribute the application under the terms of the GPLv3.
+*   If you wish to distribute Typing Analyst under different terms (e.g., in a closed-source application or as part of a commercial product), you must obtain a separate commercial license from me.
+
+Please contact me at `avikalpgupta [at] gmail [dot] com` for inquiries regarding commercial licensing.
