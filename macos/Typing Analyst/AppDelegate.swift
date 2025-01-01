@@ -24,6 +24,20 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         setupPopover()
         startGlobalKeyCapture()
         setupObservers()
+        
+        if !UserDefaults.standard.bool(forKey: "hasShownFirstRunAlert") {
+            showFirstRunAlert()
+            UserDefaults.standard.set(true, forKey: "hasShownFirstRunAlert")
+        }
+    }
+    
+    private func showFirstRunAlert() {
+        let alert = NSAlert()
+        alert.messageText = "App Not (yet) Notarized"
+        alert.informativeText = "This app is currently not notarized by Apple. This means you might see a security warning when you first try to open it. This is because I'm an independent developer starting out and haven't yet enrolled in the Apple Developer Program.\n\nTo open the app:\n1. Right-click (or Control-click) on the app icon.\n2. Select 'Open' from the context menu.\n3. You'll see a dialog box. Click 'Open' again to confirm.\n\nI plan to notarize the app in the future if there's sufficient interest."
+        alert.alertStyle = .informational
+        alert.addButton(withTitle: "OK")
+        alert.runModal()
     }
 
     func applicationWillTerminate(_ notification: Notification) {
