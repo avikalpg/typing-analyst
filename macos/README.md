@@ -2,8 +2,7 @@
 
 [![GitHub Stars](https://img.shields.io/github/stars/avikalpg/typing-analyst)](https://github.com/avikalpg/typing-analyst/stargazers)
 ![Contributor activity](https://img.shields.io/github/commit-activity/y/avikalpg/typing-analyst)
-![App version](https://img.shields.io/github/v/release/avikalpg/typing-analyst
-)
+![App version](https://img.shields.io/github/v/release/avikalpg/typing-analyst)
 ![App contributors](https://img.shields.io/github/contributors/avikalpg/typing-analyst)
 [![License](https://img.shields.io/badge/license-AGPLv3-purple)](https://github.com/avikalpg/typing-analyst/blob/main/LICENSE)
 
@@ -27,6 +26,10 @@ It's designed as a productivity tool for anyone who wants to improve their inter
 *   Visual graphs of your typing performance over time.
 *   Status bar display of key metrics.
 *   Preferences to customize data collection and display.
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/ae13c4f6-311a-4496-b354-e8bdb691034e" alt="TypingAnalyst Screenshot" width="600">
+</p>
 
 ## Getting Started
 
