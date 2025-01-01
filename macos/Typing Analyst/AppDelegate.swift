@@ -47,7 +47,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private func setupStatusItem() {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         if let button = statusItem.button {
-            button.image = NSImage(systemSymbolName: "keyboard", accessibilityDescription: "Typing Analyst")
+            if let image = NSImage(named: NSImage.Name("StatusBarIcon")) {
+                image.isTemplate = true
+                image.accessibilityDescription = "Typing Stats"
+                button.image = image
+            } else {
+                button.image = NSImage(systemSymbolName: "keyboard", accessibilityDescription: "Typing Analyst")
+            }
             button.action = #selector(togglePopover(_:))
             updateStatusBar(button: button)
         }
