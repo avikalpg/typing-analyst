@@ -13,13 +13,26 @@ struct PopoverView: View {
     @State private var chartTimeWindow: TimeInterval = 60 * 5
 
     var body: some View {
+        let baseTimeWindowOptions = [
+            TimeInterval(60),
+            TimeInterval(60 * 5),
+            TimeInterval(60 * 15),
+            TimeInterval(60 * 30),
+            TimeInterval(60 * 60),
+            TimeInterval(60 * 60 * 12),
+            TimeInterval(60 * 60 * 24)
+        ]
+
+        let maxWindow = viewModel.preferences.chartTimeWindow
+        let timeWindowOptions = baseTimeWindowOptions + (baseTimeWindowOptions.contains(maxWindow) ? [] : [maxWindow])
+
         VStack {
             Picker("Time Window", selection: $chartTimeWindow) {
-                Text("1 Minute").tag(TimeInterval(60))
-                Text("5 Minutes").tag(TimeInterval(60 * 5))
-                Text("15 Minutes").tag(TimeInterval(60 * 15))
-                Text("30 Minutes").tag(TimeInterval(60 * 30))
-                Text("1 Hour").tag(TimeInterval(60 * 60))
+                ForEach(timeWindowOptions.indices, id: \.self) { index in
+                    if timeWindowOptions[index] <= maxWindow {
+                        Text(formatTimeInterval(timeWindowOptions[index])).tag(timeWindowOptions[index])
+                    }
+                }
             }
             .pickerStyle(.segmented)
             if viewModel.preferences.showWPMChart {
@@ -38,7 +51,7 @@ struct PopoverView: View {
     func chart(data: [(x: Date, y: Double)], label: String, yRange: ClosedRange<Double>) -> some View {
         let now = Date()
         let filteredData = data.filter { now.timeIntervalSince($0.x) <= chartTimeWindow }
-        
+
         return Chart {
             ForEach(filteredData, id: \.x) { item in
                 LineMark(x: .value("Time", item.x), y: .value(label, item.y))
@@ -79,5 +92,13 @@ struct PopoverView: View {
             }
         }
         .frame(height: 150)
+    }
+
+    private func formatTimeInterval(_ interval: TimeInterval) -> String {
+        let formatter = MeasurementFormatter()
+        formatter.unitOptions = .naturalScale
+        formatter.numberFormatter.maximumFractionDigits = 1
+        let measurement = Measurement(value: interval, unit: UnitDuration.seconds)
+        return formatter.string(from: measurement)
     }
 }
