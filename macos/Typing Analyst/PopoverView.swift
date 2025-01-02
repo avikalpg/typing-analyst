@@ -50,14 +50,15 @@ struct PopoverView: View {
 
     func chart(data: [(x: Date, y: Double)], label: String, yRange: ClosedRange<Double>) -> some View {
         let now = Date()
-        let filteredData = data.filter { now.timeIntervalSince($0.x) <= chartTimeWindow }
+        let startTime = now.addingTimeInterval(-chartTimeWindow)
+        let filteredData = data.filter { $0.x >= startTime }
 
         return Chart {
             ForEach(filteredData, id: \.x) { item in
                 LineMark(x: .value("Time", item.x), y: .value(label, item.y))
             }
         }
-        .chartXScale(domain: .automatic)
+        .chartXScale(domain: startTime...now)
         .chartXAxis {
             AxisMarks(position: .bottom) { value in
                 AxisGridLine()
