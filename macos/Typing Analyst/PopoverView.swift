@@ -11,7 +11,7 @@ import Charts
 struct PopoverView: View {
     @ObservedObject var viewModel: ViewModel
     @State private var chartTimeWindow: TimeInterval = 60 * 5
-   @State private var pointerTimestamp: Date? = nil
+    @State private var pointerTimestamp: Date? = nil
 
     var body: some View {
         let baseTimeWindowOptions = [
@@ -97,20 +97,25 @@ struct PopoverView: View {
                 AxisValueLabel(format: Decimal.FormatStyle.number.rounded(rule: .toNearestOrEven))
             }
         }
-       .chartOverlay { proxy in
-           GeometryReader { geometry in
-               Rectangle().fill(.clear).contentShape(Rectangle())
-                   .onContinuousHover { phase in
-                       switch phase {
-                       case .active(let location):
-                           pointerTimestamp = proxy.value(atX: location.x, as: Date.self)
-                        case .ended:
-                           pointerTimestamp = nil
-                       }
-                   }
-           }
-       }
         .frame(height: 150)
+        .chartOverlay { proxy in
+            GeometryReader { geometry in
+                Rectangle().fill(.clear).contentShape(Rectangle())
+                    .onContinuousHover { phase in
+                        switch phase {
+                        case .active(let location):
+                            let plotAreaFrame = geometry[proxy.plotAreaFrame]
+                            let adjustedLocation = CGPoint(
+                                x: location.x - plotAreaFrame.origin.x,
+                                y: location.y - plotAreaFrame.origin.y
+                            )
+                            pointerTimestamp = proxy.value(atX: adjustedLocation.x, as: Date.self)
+                        case .ended:
+                            pointerTimestamp = nil
+                        }
+                    }
+            }
+        }
     }
 
     private func formatTimeInterval(_ interval: TimeInterval) -> String {
