@@ -43,13 +43,13 @@ struct PopoverView: View {
                 chart(data: viewModel.cpmData, label: "CPM", yRange: 0...500)
             }
             if viewModel.preferences.showAccuracyChart {
-                chart(data: viewModel.accuracyData, label: "Accuracy", yRange: 0...100)
+                chart(data: viewModel.accuracyData, label: "Accuracy", yRange: 0...100, ySuffix: "%")
             }
         }
         .padding()
     }
 
-    func chart(data: [(x: Date, y: Double)], label: String, yRange: ClosedRange<Double>) -> some View {
+    func chart(data: [(x: Date, y: Double)], label: String, yRange: ClosedRange<Double>, ySuffix: String = "") -> some View {
         let now = Date()
         let startTime = now.addingTimeInterval(-chartTimeWindow)
         let filteredData = data.filter { $0.x >= startTime }
@@ -59,8 +59,15 @@ struct PopoverView: View {
                 LineMark(x: .value("Time", item.x), y: .value(label, item.y))
             }
             if let pointerTimestamp {
-                PointMark(x: .value("Time", pointerTimestamp), y: .value(label, filteredData.first(where: { abs($0.x.timeIntervalSince(pointerTimestamp)) < 1})?.y ?? 0))
-                    .foregroundStyle(.red)
+                if let point = filteredData.first(where: { abs($0.x.timeIntervalSince(pointerTimestamp)) < 1}) {
+                    PointMark(x: .value("Time", pointerTimestamp), y: .value(label, point.y))
+                        .foregroundStyle(.red)
+                        .annotation(position: .top) {
+                            Text("\(point.y, format: .number.precision(.fractionLength(0)))\(ySuffix)")
+                                .font(.caption)
+                                .foregroundColor(.red)
+                        }
+                }
             }
         }
         .chartXScale(domain: startTime...now)
@@ -94,7 +101,12 @@ struct PopoverView: View {
             AxisMarks(position: .leading) { value in
                 AxisGridLine()
                 AxisTick()
-                AxisValueLabel(format: Decimal.FormatStyle.number.rounded(rule: .toNearestOrEven))
+                AxisValueLabel {
+                    let formattedValue = value.as(Double.self).map {
+                        Decimal($0).formatted(.number.rounded(rule: .toNearestOrEven))
+                    } ?? ""
+                    Text(formattedValue + ySuffix)
+                }
             }
         }
         .frame(height: 150)
