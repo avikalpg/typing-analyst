@@ -29,9 +29,9 @@ struct PopoverView: View {
 
         VStack {
             Picker("Time Window", selection: $chartTimeWindow) {
-                ForEach(timeWindowOptions.indices, id: \.self) { index in
-                    if timeWindowOptions[index] <= maxWindow {
-                        Text(formatTimeInterval(timeWindowOptions[index])).tag(timeWindowOptions[index])
+                ForEach(timeWindowOptions, id: \.self) { option in
+                    if option <= maxWindow {
+                        Text(formatTimeInterval(option)).tag(option)
                     }
                 }
             }
