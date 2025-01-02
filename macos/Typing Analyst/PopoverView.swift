@@ -11,6 +11,7 @@ import Charts
 struct PopoverView: View {
     @ObservedObject var viewModel: ViewModel
     @State private var chartTimeWindow: TimeInterval = 60 * 5
+   @State private var pointerTimestamp: Date? = nil
 
     var body: some View {
         let baseTimeWindowOptions = [
@@ -57,6 +58,10 @@ struct PopoverView: View {
             ForEach(filteredData, id: \.x) { item in
                 LineMark(x: .value("Time", item.x), y: .value(label, item.y))
             }
+            if let pointerTimestamp {
+                PointMark(x: .value("Time", pointerTimestamp), y: .value(label, filteredData.first(where: { abs($0.x.timeIntervalSince(pointerTimestamp)) < 1})?.y ?? 0))
+                    .foregroundStyle(.red)
+            }
         }
         .chartXScale(domain: startTime...now)
         .chartXAxis {
@@ -92,6 +97,19 @@ struct PopoverView: View {
                 AxisValueLabel(format: Decimal.FormatStyle.number.rounded(rule: .toNearestOrEven))
             }
         }
+       .chartOverlay { proxy in
+           GeometryReader { geometry in
+               Rectangle().fill(.clear).contentShape(Rectangle())
+                   .onContinuousHover { phase in
+                       switch phase {
+                       case .active(let location):
+                           pointerTimestamp = proxy.value(atX: location.x, as: Date.self)
+                        case .ended:
+                           pointerTimestamp = nil
+                       }
+                   }
+           }
+       }
         .frame(height: 150)
     }
 
