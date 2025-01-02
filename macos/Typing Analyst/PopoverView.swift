@@ -11,6 +11,7 @@ import Charts
 struct PopoverView: View {
     @ObservedObject var viewModel: ViewModel
     @State private var chartTimeWindow: TimeInterval = 60 * 5
+    @State private var pointerTimestamp: Date? = nil
 
     var body: some View {
         let baseTimeWindowOptions = [
@@ -28,9 +29,9 @@ struct PopoverView: View {
 
         VStack {
             Picker("Time Window", selection: $chartTimeWindow) {
-                ForEach(timeWindowOptions.indices, id: \.self) { index in
-                    if timeWindowOptions[index] <= maxWindow {
-                        Text(formatTimeInterval(timeWindowOptions[index])).tag(timeWindowOptions[index])
+                ForEach(timeWindowOptions, id: \.self) { option in
+                    if option <= maxWindow {
+                        Text(formatTimeInterval(option)).tag(option)
                     }
                 }
             }
@@ -42,13 +43,13 @@ struct PopoverView: View {
                 chart(data: viewModel.cpmData, label: "CPM", yRange: 0...500)
             }
             if viewModel.preferences.showAccuracyChart {
-                chart(data: viewModel.accuracyData, label: "Accuracy", yRange: 0...100)
+                chart(data: viewModel.accuracyData, label: "Accuracy", yRange: 0...100, ySuffix: "%")
             }
         }
         .padding()
     }
 
-    func chart(data: [(x: Date, y: Double)], label: String, yRange: ClosedRange<Double>) -> some View {
+    func chart(data: [(x: Date, y: Double)], label: String, yRange: ClosedRange<Double>, ySuffix: String = "") -> some View {
         let now = Date()
         let startTime = now.addingTimeInterval(-chartTimeWindow)
         let filteredData = data.filter { $0.x >= startTime }
@@ -56,6 +57,17 @@ struct PopoverView: View {
         return Chart {
             ForEach(filteredData, id: \.x) { item in
                 LineMark(x: .value("Time", item.x), y: .value(label, item.y))
+            }
+            if let pointerTimestamp {
+                if let point = filteredData.first(where: { abs($0.x.timeIntervalSince(pointerTimestamp)) < 1}) {
+                    PointMark(x: .value("Time", pointerTimestamp), y: .value(label, point.y))
+                        .foregroundStyle(.red)
+                        .annotation(position: .top) {
+                            Text("\(point.y, format: .number.precision(.fractionLength(0)))\(ySuffix)")
+                                .font(.caption)
+                                .foregroundColor(.red)
+                        }
+                }
             }
         }
         .chartXScale(domain: startTime...now)
@@ -89,10 +101,33 @@ struct PopoverView: View {
             AxisMarks(position: .leading) { value in
                 AxisGridLine()
                 AxisTick()
-                AxisValueLabel(format: Decimal.FormatStyle.number.rounded(rule: .toNearestOrEven))
+                AxisValueLabel {
+                    let formattedValue = value.as(Double.self).map {
+                        Decimal($0).formatted(.number.rounded(rule: .toNearestOrEven))
+                    } ?? ""
+                    Text(formattedValue + ySuffix)
+                }
             }
         }
         .frame(height: 150)
+        .chartOverlay { proxy in
+            GeometryReader { geometry in
+                Rectangle().fill(.clear).contentShape(Rectangle())
+                    .onContinuousHover { phase in
+                        switch phase {
+                        case .active(let location):
+                            let plotAreaFrame = geometry[proxy.plotAreaFrame]
+                            let adjustedLocation = CGPoint(
+                                x: location.x - plotAreaFrame.origin.x,
+                                y: location.y - plotAreaFrame.origin.y
+                            )
+                            pointerTimestamp = proxy.value(atX: adjustedLocation.x, as: Date.self)
+                        case .ended:
+                            pointerTimestamp = nil
+                        }
+                    }
+            }
+        }
     }
 
     private func formatTimeInterval(_ interval: TimeInterval) -> String {
