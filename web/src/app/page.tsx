@@ -3,11 +3,11 @@ import Link from "next/link";
 
 export default function Home() {
 	return (
-		<div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen gap-16 sm:p-20 font-[family-name:var(--font-space-mono-regular)] bg-background">
+		<div className="grid grid-rows-[1fr_20px_2fr] items-center justify-items-center min-h-screen gap-16 sm:p-20 font-[family-name:var(--font-space-mono-regular)] bg-background">
 			<main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
 				<Image
 					className="dark:invert"
-					src="/typingAnalystNameTransparent.gif"
+					src="/typingAnalystName.gif"
 					alt="Next.js logo"
 					width={1024}
 					height={480}
@@ -38,7 +38,7 @@ export default function Home() {
 						Download for Linux
 					</Link> */}
 				</div>
-				<Link href="/signup" className="mt-4 hover:underline">
+				<Link href="/signup" className="hover:underline">
 					Sign up for long-term statistics
 				</Link>
 			</main>

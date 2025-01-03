@@ -32,7 +32,7 @@ export default function LoginPage() {
 	};
 
 	return (
-		<div className="flex flex-col items-center justify-center min-h-screen bg-background">
+		<div className="flex flex-col items-center justify-center -mt-36 min-h-screen bg-background">
 			<h1 className="text-3xl font-bold mb-8">Login / Sign Up</h1>
 			<form className="flex flex-col gap-4 w-full max-w-sm" onSubmit={handleLogin}>
 				<input
@@ -56,7 +56,7 @@ export default function LoginPage() {
 				{error && <p className="text-red-500">{error}</p>}
 				<button
 					type="submit"
-					className="p-2 bg-foreground text-background rounded hover:bg-[#383838] dark:hover:bg-[#ccc]"
+					className="p-2 cta-btn rounded hover:bg-[#383838] dark:hover:bg-[#ccc]"
 					disabled={loading}
 				>
 					{loading ? 'Logging in...' : 'Login'}
@@ -64,7 +64,7 @@ export default function LoginPage() {
 			</form>
 			<p className="mt-4">
 				Don't have an account?{" "}
-				<Link href={"/signup"} className="text-blue-500 hover:underline btn">
+				<Link href={"/signup"} className="hover:underline">
 					Sign up
 				</Link>
 			</p>
