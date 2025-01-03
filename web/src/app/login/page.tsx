@@ -21,8 +21,7 @@ export default function LoginPage() {
 				setError(response.data.error || 'Login failed.');
 			} else {
 				localStorage.setItem('userId', response.data.userId);
-				// Redirect to the desired page after successful login
-				window.location.href = '/'; // Or another route
+				window.location.href = '/'; // Redirect to the desired page after successful login
 			}
 		} catch (err) {
 			setError('An unexpected error occurred.');
