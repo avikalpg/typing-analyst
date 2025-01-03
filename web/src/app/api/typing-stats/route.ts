@@ -53,3 +53,30 @@ export async function POST(request: Request) {
 		return NextResponse.json({ error: 'Failed to insert data' }, { status: 500 });
 	}
 }
+
+export async function GET(request: Request) {
+	try {
+		// 1. Authenticate the request (using Supabase Auth)
+		const { data: { user } } = await supabase.auth.getUser();
+
+		if (!user) {
+			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+		}
+
+		// 2. Fetch the typing statistics for the authenticated user
+		const { data, error } = await supabase
+			.from('typing_stats')
+			.select('*')
+			.eq('user_id', user.id);
+
+		if (error) {
+			console.error('Supabase error:', error);
+			return NextResponse.json({ error: error.message }, { status: 500 });
+		}
+
+		return NextResponse.json({ data }, { status: 200 });
+	} catch (error) {
+		console.error('Server error:', error);
+		return NextResponse.json({ error: 'Failed to fetch data' }, { status: 500 });
+	}
+}
