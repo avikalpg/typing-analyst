@@ -18,7 +18,7 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #004d40;
+    --background: #003a30;
     /* Dark teal background for dark mode */
     --foreground: #ffffff;
     /* White text for dark mode */
@@ -58,6 +58,7 @@ button,
   border: none;
   padding: 10px 20px;
   cursor: pointer;
+  border-radius: 10px;
 }
 
 button:hover,
@@ -82,6 +83,10 @@ button:hover,
 .cta-btn {
   background: var(--accent);
   color: var(--foreground);
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  border-radius: 10px;
 }
 
 .cta-btn:hover {
