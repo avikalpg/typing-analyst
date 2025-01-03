@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/utils/supabaseClient';
+import { Json } from '../../../database.types';
 
 type TypingStat = {
 	start_timestamp: string;
@@ -8,8 +9,8 @@ type TypingStat = {
 	device_id: string;
 	keyboard_id: string | null;
 	locale: string;
-	per_second_data: any[];
-	chunk_stats: any;
+	per_second_data: Json[];
+	chunk_stats: Json;
 };
 
 export async function POST(request: Request) {
@@ -37,7 +38,7 @@ export async function POST(request: Request) {
 		}
 
 		// 3. Insert the data into Supabase
-		const { data, error } = await supabase
+		const { error } = await supabase
 			.from('typing_stats')
 			.insert({ ...typingStats, user_id: user.id });
 

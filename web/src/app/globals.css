@@ -56,9 +56,10 @@ button,
   background-color: var(--secondary);
   color: var(--background);
   border: none;
-  padding: 10px 20px;
+  padding: 5px 20px;
   cursor: pointer;
   border-radius: 10px;
+  font-weight: bolder;
 }
 
 button:hover,
@@ -84,9 +85,10 @@ button:hover,
   background: var(--accent);
   color: var(--foreground);
   border: none;
-  padding: 10px 20px;
+  padding: 5px 20px;
   cursor: pointer;
   border-radius: 10px;
+  font-weight: bold;
 }
 
 .cta-btn:hover {

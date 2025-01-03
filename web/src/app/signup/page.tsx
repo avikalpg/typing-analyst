@@ -32,8 +32,8 @@ export default function SignUpPage() {
 	};
 
 	return (
-		<div className="flex flex-col items-center justify-center min-h-screen bg-background">
-			<h1 className="text-3xl font-bold mb-8">Login / Sign Up</h1>
+		<div className="flex flex-col items-center justify-center -mt-36 min-h-screen bg-background">
+			<h1 className="text-3xl font-bold mb-8">Sign Up</h1>
 			<form className="flex flex-col gap-4 w-full max-w-sm" onSubmit={handleSignUp}>
 				<input
 					type="email"
@@ -54,7 +54,7 @@ export default function SignUpPage() {
 				{error && <p className="text-red-500">{error}</p>}
 				<button
 					type="submit"
-					className="p-2 bg-foreground text-background rounded hover:bg-[#383838] dark:hover:bg-[#ccc]"
+					className="!p-2 cta-btn"
 					disabled={loading}
 				>
 					{loading ? 'Signing up...' : 'Sign Up'}
@@ -62,7 +62,7 @@ export default function SignUpPage() {
 			</form>
 			<p className="mt-4">
 				Already have an account?{" "}
-				<Link href={"/login"} className="text-blue-500 hover:underline">
+				<Link href={"/login"} className="hover:underline">
 					Log in
 				</Link>
 			</p>
