@@ -37,22 +37,23 @@ struct PopoverView: View {
             }
             .pickerStyle(.segmented)
             if viewModel.preferences.showWPMChart {
-                chart(data: viewModel.wpmData, label: "WPM", yRange: 0...150)
+                chart(data: viewModel.wpmData, label: "WPM", yRange: 0...150, showPointerTimestamp: true)
             }
             if viewModel.preferences.showCPMChart {
-                chart(data: viewModel.cpmData, label: "CPM", yRange: 0...500)
+                chart(data: viewModel.cpmData, label: "CPM", yRange: 0...500, showPointerTimestamp: false)
             }
             if viewModel.preferences.showAccuracyChart {
-                chart(data: viewModel.accuracyData, label: "Accuracy", yRange: 0...100, ySuffix: "%")
+                chart(data: viewModel.accuracyData, label: "Accuracy", yRange: 0...100, ySuffix: "%", showPointerTimestamp: false)
             }
         }
         .padding()
     }
 
-    func chart(data: [(x: Date, y: Double)], label: String, yRange: ClosedRange<Double>, ySuffix: String = "") -> some View {
+    func chart(data: [(x: Date, y: Double)], label: String, yRange: ClosedRange<Double>, ySuffix: String = "", showPointerTimestamp: Bool = true) -> some View {
         let now = Date()
         let startTime = now.addingTimeInterval(-chartTimeWindow)
         let filteredData = data.filter { $0.x >= startTime }
+        let yMidpoint = (yRange.lowerBound + yRange.upperBound) / 2
 
         return Chart {
             ForEach(filteredData, id: \.x) { item in
@@ -62,7 +63,7 @@ struct PopoverView: View {
                 if let point = filteredData.first(where: { abs($0.x.timeIntervalSince(pointerTimestamp)) < 1}) {
                     PointMark(x: .value("Time", pointerTimestamp), y: .value(label, point.y))
                         .foregroundStyle(.red)
-                        .annotation(position: .top) {
+                        .annotation(position: point.y <= yMidpoint ? .top : .bottom) {
                             Text("\(point.y, format: .number.precision(.fractionLength(0)))\(ySuffix)")
                                 .font(.caption)
                                 .foregroundColor(.red)
@@ -90,9 +91,12 @@ struct PopoverView: View {
                     AxisValueLabel(format: format)
                 }
             }
-            AxisMarks(position: .bottom, values: [filteredData.first?.x ?? Date()]) { value in
-                if value.as(Date.self) != nil {
-                    AxisValueLabel(format: .dateTime.hour(.defaultDigits(amPM: .wide)).minute(.defaultDigits).second(.defaultDigits))
+            if showPointerTimestamp {
+                AxisMarks(position: .top, values: [pointerTimestamp ?? Date()]) { value in
+                    if value.as(Date.self) != nil {
+                        AxisValueLabel(format: .dateTime.hour(.defaultDigits(amPM: .wide)).minute(.defaultDigits).second(.defaultDigits))
+                            .foregroundStyle(.red)
+                    }
                 }
             }
         }
