@@ -28,6 +28,7 @@ const TypingStatsPage: React.FC = () => {
 
 			if (!userId) {
 				setError('Unauthorized');
+				window.location.href = '/login';
 				return;
 			}
 
@@ -40,6 +41,12 @@ const TypingStatsPage: React.FC = () => {
 
 			if (!response.ok) {
 				const errorData = await response.json();
+				if (response.status === 401) {
+					setError('Unauthorized');
+					console.error('Unauthorized: redirecting to login');
+					window.location.href = '/login';
+					return;
+				}
 				setError(errorData.error);
 				return;
 			}
