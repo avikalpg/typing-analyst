@@ -19,7 +19,7 @@ export async function POST(request: Request) {
 			return NextResponse.json({ error: error.message }, { status: 401 }); // Or another appropriate status code
 		}
 
-		const response = NextResponse.json({ message: 'Login successful' }, { status: 200 });
+		const response = NextResponse.json({ message: 'Login successful', userId: data.user.id }, { status: 200 });
 
 		if (data.session) {
 			// Set the access token cookie

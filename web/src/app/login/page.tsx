@@ -20,6 +20,7 @@ export default function LoginPage() {
 			if (response.status !== 200) {
 				setError(response.data.error || 'Login failed.');
 			} else {
+				localStorage.setItem('userId', response.data.userId);
 				// Redirect to the desired page after successful login
 				window.location.href = '/'; // Or another route
 			}
@@ -33,7 +34,7 @@ export default function LoginPage() {
 
 	return (
 		<div className="flex flex-col items-center justify-center -mt-36 min-h-screen bg-background">
-			<h1 className="text-3xl font-bold mb-8">Login / Sign Up</h1>
+			<h1 className="text-3xl font-bold mb-8">Login</h1>
 			<form className="flex flex-col gap-4 w-full max-w-sm" onSubmit={handleLogin}>
 				<input
 					type="email"
@@ -56,14 +57,14 @@ export default function LoginPage() {
 				{error && <p className="text-red-500">{error}</p>}
 				<button
 					type="submit"
-					className="p-2 cta-btn rounded hover:bg-[#383838] dark:hover:bg-[#ccc]"
+					className="!p-2 cta-btn"
 					disabled={loading}
 				>
 					{loading ? 'Logging in...' : 'Login'}
 				</button>
 			</form>
 			<p className="mt-4">
-				Don't have an account?{" "}
+				Don&apos;t have an account?{" "}
 				<Link href={"/signup"} className="hover:underline">
 					Sign up
 				</Link>
