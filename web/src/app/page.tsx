@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export default function Home() {
 	return (
-		<div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen gap-16 sm:p-20 font-[family-name:var(--font-space-mono-regular)]">
+		<div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen gap-16 sm:p-20 font-[family-name:var(--font-space-mono-regular)] bg-background">
 			<main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
 				<Image
 					className="dark:invert"
@@ -19,26 +19,26 @@ export default function Home() {
 					Track your typing statistics and improve your typing skills with our desktop applications.
 				</p>
 				<div className="flex gap-4 items-center flex-col sm:flex-row">
-					<a
-						className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
+					<Link
+						className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center btn gap-2 text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
 						href="/downloads/macos"
 					>
 						Download for MacOS
-					</a>
-					<a
-						className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
+					</Link>
+					{/* <Link
+						className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-secondary text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
 						href="/downloads/windows"
 					>
 						Download for Windows
-					</a>
-					<a
-						className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
+					</Link>
+					<Link
+						className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center cta-btn text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
 						href="/downloads/linux"
 					>
 						Download for Linux
-					</a>
+					</Link> */}
 				</div>
-				<Link href="/signup" className="mt-4 text-blue-500 hover:underline">
+				<Link href="/signup" className="mt-4 hover:underline">
 					Sign up for long-term statistics
 				</Link>
 			</main>
