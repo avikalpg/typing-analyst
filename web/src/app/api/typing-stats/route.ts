@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/utils/supabaseClient';
-import { Json } from '../../../database.types';
+import { Json } from '../../../../database.types';
+import { convertTimestampsToISO } from '@/utils/datetime';
 
 type TypingStat = {
-	start_timestamp: string;
-	end_timestamp: string;
+	start_timestamp: number; // milliseconds since epoch
+	end_timestamp: number; // milliseconds since epoch
 	application: string;
 	device_id: string;
 	keyboard_id: string | null;
@@ -38,9 +39,10 @@ export async function POST(request: Request) {
 		}
 
 		// 3. Insert the data into Supabase
+		const dataToInsert = convertTimestampsToISO(typingStats);
 		const { error } = await supabase
 			.from('typing_stats')
-			.insert({ ...typingStats, user_id: user.id });
+			.insert({ ...dataToInsert, user_id: user.id });
 
 		if (error) {
 			console.error('Supabase error:', error);
