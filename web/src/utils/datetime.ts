@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export function convertTimestampsToISO(obj: any): any {
 	if (typeof obj === 'number') {
 		return new Date(obj).toISOString();
@@ -18,3 +19,4 @@ export function convertTimestampsToISO(obj: any): any {
 	}
 	return obj;
 }
+/* eslint-enable @typescript-eslint/no-explicit-any */
