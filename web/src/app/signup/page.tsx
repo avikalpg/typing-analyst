@@ -21,7 +21,7 @@ export default function SignUpPage() {
 				setError(response.data.error || 'Sign up failed.');
 			} else {
 				// Redirect to the desired page after successful login
-				window.location.href = '/'; // Or another route
+				window.location.href = '/typing-stats'; // Or another route
 			}
 		} catch (err) {
 			setError('An unexpected error occurred.');

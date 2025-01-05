@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/utils/supabaseClient';
-import { Json } from '../../../database.types';
+import { Json } from '../../../../database.types';
+import { convertTimestampsToISO } from '@/utils/datetime';
 
 type TypingStat = {
-	start_timestamp: string;
-	end_timestamp: string;
+	start_timestamp: number; // milliseconds since epoch
+	end_timestamp: number; // milliseconds since epoch
 	application: string;
 	device_id: string;
 	keyboard_id: string | null;
@@ -38,9 +39,10 @@ export async function POST(request: Request) {
 		}
 
 		// 3. Insert the data into Supabase
+		const dataToInsert = convertTimestampsToISO(typingStats);
 		const { error } = await supabase
 			.from('typing_stats')
-			.insert({ ...typingStats, user_id: user.id });
+			.insert({ ...dataToInsert, user_id: user.id });
 
 		if (error) {
 			console.error('Supabase error:', error);
@@ -51,5 +53,32 @@ export async function POST(request: Request) {
 	} catch (error) {
 		console.error('Server error:', error);
 		return NextResponse.json({ error: 'Failed to insert data' }, { status: 500 });
+	}
+}
+
+export async function GET(request: Request) {
+	try {
+		// 1. Authenticate the request (using Supabase Auth)
+		const { data: { user } } = await supabase.auth.getUser();
+
+		if (!user) {
+			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+		}
+
+		// 2. Fetch the typing statistics for the authenticated user
+		const { data, error } = await supabase
+			.from('typing_stats')
+			.select('*')
+			.eq('user_id', user.id);
+
+		if (error) {
+			console.error('Supabase error:', error);
+			return NextResponse.json({ error: error.message }, { status: 500 });
+		}
+
+		return NextResponse.json({ data }, { status: 200 });
+	} catch (error) {
+		console.error('Server error:', error);
+		return NextResponse.json({ error: 'Failed to fetch data' }, { status: 500 });
 	}
 }

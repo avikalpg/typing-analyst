@@ -25,9 +25,11 @@ class ViewModel: ObservableObject {
     @Published var cpmData: [(x: Date, y: Double)] = []
     @Published var accuracyData: [(x: Date, y: Double)] = []
     
+    private let typingDataSender: TypingDataSender
 
-    init(preferences: AppPreferences) {
+    init(preferences: AppPreferences, typingDataSender: TypingDataSender) {
         self.preferences = preferences
+        self.typingDataSender = typingDataSender
         startTimer()
     }
 
@@ -52,6 +54,7 @@ class ViewModel: ObservableObject {
     func addKeystroke(keystroke: Keystroke) {
         keystrokes.append(keystroke) // Just append, no need to remove
         update()
+        typingDataSender.addKeystrokesToChunk(keystroke: keystroke)
     }
     
     func update() {
