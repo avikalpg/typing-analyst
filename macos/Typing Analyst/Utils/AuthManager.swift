@@ -45,28 +45,27 @@ class AuthManager: NSObject { // NSObject is needed for ASWebAuthenticationSessi
                     cookieStorage.setCookie(cookie)
                 }
             }
-            
+
             completion(.success(())) // Login successful
         }.resume()
     }
 
-    func sendTypingData(data: [String: Any], completion: @escaping (Result<Void, Error>) -> Void) {
-        makeApiRequest(url: URL(string: self.serverURL + "/api/typing-stats")!, data: data, completion: completion)
-    }
-
-    private func makeApiRequest(url: URL, data: [String: Any], completion: @escaping (Result<Void, Error>) -> Void) {
+    private func makeApiRequest(apiEndPoint: String, requestBody: [String: Any]?, completion: @escaping (Result<Data?, Error>) -> Void) {
+        guard let url = URL(string: "\(serverURL)\(apiEndPoint)") else { return }
         var request = URLRequest(url: url)
-        request.httpMethod = "POST"
+        request.httpMethod = requestBody != nil ? "POST" : "GET"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
         if let cookies = HTTPCookieStorage.shared.cookies(for: request.url!) {
             let cookieHeader = HTTPCookie.requestHeaderFields(with: cookies)
             request.allHTTPHeaderFields = cookieHeader
         }
-        let body = try? JSONSerialization.data(withJSONObject: data)
-        request.httpBody = body
 
-        URLSession.shared.dataTask(with: request) { dataTask, response, error in
+        if let requestBody = requestBody { // Renamed parameter
+            request.httpBody = try? JSONSerialization.data(withJSONObject: requestBody)
+        }
+
+        URLSession.shared.dataTask(with: request) { receivedData, response, error in // Renamed variable
             if let error = error {
                 completion(.failure(error))
                 return
@@ -77,25 +76,31 @@ class AuthManager: NSObject { // NSObject is needed for ASWebAuthenticationSessi
                 return
             }
             if (200...299).contains(httpResponse.statusCode) {
-                completion(.success(()))
+                completion(.success(receivedData)) // Renamed variable
                 return
             } else if httpResponse.statusCode == 401 {
                 self.refreshTokens { refreshResult in
                     switch refreshResult {
                     case .success():
-                        self.makeApiRequest(url: url, data: data, completion: completion)
+                        self.makeApiRequest(apiEndPoint: apiEndPoint, requestBody: requestBody, completion: completion) // Renamed parameter
                     case .failure(let refreshError):
                         completion(.failure(refreshError))
                     }
                 }
             } else {
-                completion(.failure(NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey : "Invalid response from server"])))
+                if let receivedData = receivedData, let str = String(data: receivedData, encoding: .utf8) { // Renamed variable
+                    print("Response Body: \(str)")
+                }
+                completion(.failure(NSError(domain: "", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey : "Invalid response from server"])))
             }
         }.resume()
     }
 
     private func refreshTokens(completion: @escaping (Result<Void, Error>) -> Void) {
-        guard let url = URL(string: self.serverURL + "/api/auth/refresh") else { return }
+        guard let url = URL(string: "\(serverURL)/api/auth/refresh") else {
+            completion(.failure(NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey : "Invalid refresh URL"])))
+            return
+        }
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
 
@@ -126,11 +131,11 @@ class AuthManager: NSObject { // NSObject is needed for ASWebAuthenticationSessi
                 }
                 completion(.success(()))
             } else {
-                completion(.failure(NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey : "Could not refresh token"])))
+                completion(.failure(NSError(domain: "", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey : "Could not refresh token"])))
             }
         }.resume()
     }
-    
+
     func logout(completion: @escaping (Result<Void, Error>) -> Void) {
         guard let url = URL(string: "\(self.serverURL)/api/auth/logout") else { return } // Replace with your API URL
         var request = URLRequest(url: url)
@@ -159,8 +164,24 @@ class AuthManager: NSObject { // NSObject is needed for ASWebAuthenticationSessi
                     cookieStorage.setCookie(cookie)
                 }
             }
-            
+
             completion(.success(())) // Logout successful
         }.resume()
+    }
+
+    func sendTypingData(data: TypingData, completion: @escaping (Result<Void, Error>) -> Void) {
+        let keyValueData = data.toKeyValueData()
+        makeApiRequest(apiEndPoint: "/api/typing-stats", requestBody: keyValueData) { result in
+            switch result {
+            case .success(_):
+                completion(.success(()))
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
+
+    func getData(apiEndPoint: String, completion: @escaping (Result<Data?, Error>) -> Void) {
+        makeApiRequest(apiEndPoint: apiEndPoint, requestBody: nil, completion: completion)
     }
 }

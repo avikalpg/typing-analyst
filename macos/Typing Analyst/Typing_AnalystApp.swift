@@ -12,10 +12,11 @@ struct Typing_AnalystApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate: AppDelegate
     @State private var preferences: AppPreferences = .load()
     @StateObject var viewModel: ViewModel
+    let typingDataSender = TypingDataSender()
 
     init() {
         let preferences = AppPreferences.load()
-        let viewModel = ViewModel(preferences: preferences)
+        let viewModel = ViewModel(preferences: preferences, typingDataSender: typingDataSender)
         _viewModel = StateObject(wrappedValue: viewModel)
         appDelegate.viewModel = viewModel
     }

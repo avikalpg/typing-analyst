@@ -27,5 +27,7 @@ struct AccountSettingsView: View {
                 }
             }
         }
+        .frame(width: 800)
+        .padding(20)
     }
 }

@@ -47,10 +47,14 @@ struct TypingCalculations {
     }
 
     static func calculateAccuracy(from keystrokes: [Keystroke], in timeWindow: TimeInterval) -> Double {
-        guard !keystrokes.isEmpty else { return 100.0 } // 100% if no input
-
         let now = Date()
-        let relevantKeystrokes = keystrokes.filter { now.timeIntervalSince($0.timestamp) <= timeWindow }
+        let startTime = now.addingTimeInterval(-timeWindow)
+        return calculateAccuracyDuring(keystrokes: keystrokes, from: startTime, to: now)
+    }
+        
+    static func calculateAccuracyDuring(keystrokes: [Keystroke], from: Date, to: Date) -> Double {
+        guard !keystrokes.isEmpty else { return 100.0 } // 100% if no input
+        let relevantKeystrokes = keystrokes.filter { to.timeIntervalSince($0.timestamp) <= to.timeIntervalSince(from) }
 
         guard !relevantKeystrokes.isEmpty else { return 100.0 }
 
