@@ -12,7 +12,7 @@ class AuthManager: NSObject { // NSObject is needed for ASWebAuthenticationSessi
 
     static let shared = AuthManager() // Singleton instance
     private override init() {} // Prevent direct instantiation
-    let serverURL = "http://localhost:3000"
+    let serverURL = "https://typing-analyst.vercel.app/" // "http://localhost:3000"
 
     func loginWithEmailAndPassword(email: String, password: String, completion: @escaping (Result<Void, Error>) -> Void) {
         print("login URL: \(self.serverURL)/api/auth/login")
