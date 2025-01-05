@@ -13,29 +13,30 @@ class TypingDataSender: NSObject {
     private var timer: Timer?
     private let inactivityInterval: TimeInterval = 10 // 10 seconds
     private var currentChunkKeystrokes: [Keystroke] = []
-    
+
     override init() {
         super.init()
     }
-    
+
     deinit {
         timer?.invalidate()
     }
-    
+
     func addKeystrokesToChunk(keystroke: Keystroke) {
+        guard UserDefaults.standard.bool(forKey: "isLoggedIn") else { return }
         currentChunkKeystrokes.append(keystroke)
         resetInactivityTimer()
     }
-    
+
     private func resetInactivityTimer() {
         lastActivity = Date()
         timer?.invalidate() // Invalidate existing timer
-        
+
         timer = Timer.scheduledTimer(withTimeInterval: inactivityInterval, repeats: false) { [weak self] _ in
             self?.sendTypingDataToServer()
         }
     }
-    
+
     private func createTypingDataFromKeystrokes(keystrokes: [Keystroke]) -> TypingData {
         let startTime = keystrokes.first!.timestamp
         let endTime = keystrokes.last!.timestamp
@@ -45,7 +46,7 @@ class TypingDataSender: NSObject {
             accuracy: TypingCalculations.calculateAccuracyDuring(keystrokes: keystrokes, from: startTime, to: endTime)
         )
         let perSecondData = groupKeystrokesBySecond(keystrokes: keystrokes)
-        
+
         let dataToSend: TypingData = TypingData(
             start_timestamp: startTime,
             end_timestamp: endTime,
@@ -56,15 +57,15 @@ class TypingDataSender: NSObject {
             per_second_data: perSecondData,
             chunk_stats: chunkStats
         )
-        
+
         return dataToSend
     }
-    
-    func sendTypingDataToServer() {
+
+    private func sendTypingDataToServer() {
         guard !currentChunkKeystrokes.isEmpty else { return }
-        
+
         let dataToSend = createTypingDataFromKeystrokes(keystrokes: currentChunkKeystrokes)
-        
+
         AuthManager.shared.sendTypingData(data: dataToSend) { result in
             switch result {
             case .success():
@@ -77,7 +78,7 @@ class TypingDataSender: NSObject {
         }
     }
 
-    func groupKeystrokesBySecond(keystrokes: [Keystroke]) -> [PerSecondDataPoint] {
+    private func groupKeystrokesBySecond(keystrokes: [Keystroke]) -> [PerSecondDataPoint] {
         guard !keystrokes.isEmpty else { return [] }
 
         let dateFormatter = DateFormatter()
