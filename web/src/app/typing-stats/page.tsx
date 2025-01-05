@@ -3,19 +3,37 @@
 import React, { useEffect, useState } from 'react';
 import { Line } from 'react-chartjs-2';
 import 'chart.js/auto';
+import ChunkWPMGraph from './ChunkWPMGraph';
+import ChunkAccuracyGraph from './ChunkAccuracyGraph';
 
-type TypingStat = {
+export type TypingStat = {
 	start_timestamp: string;
 	end_timestamp: string;
 	application: string;
 	device_id: string;
 	keyboard_id: string | null;
 	locale: string;
-	per_second_data: any[];
+	per_second_data: PerSecondData[];
 	chunk_stats: {
-		wpm: number;
+		totalWords: number;
+		totatKeystrokes: number;
 		accuracy: number;
 	};
+};
+
+export type PerSecondData = {
+	timestamp: string;
+	keystrokes: number;
+	words: number;
+	accuracy: number;
+	backspaces: number;
+	keyStates: {
+		numbers: number;
+		symbols: number;
+		alphabets: number;
+		modifiers: number;
+		backspaces: number;
+	}
 };
 
 const TypingStatsPage: React.FC = () => {
@@ -58,45 +76,15 @@ const TypingStatsPage: React.FC = () => {
 		fetchTypingStats();
 	}, []);
 
-	const wpmData = {
-		labels: typingStats.map(stat => new Date(stat.start_timestamp).toLocaleDateString()),
-		datasets: [
-			{
-				label: 'WPM',
-				data: typingStats.map(stat => stat.chunk_stats.wpm),
-				borderColor: 'rgba(75, 192, 192, 1)',
-				backgroundColor: 'rgba(75, 192, 192, 0.2)',
-			},
-		],
-	};
-
-	const accuracyData = {
-		labels: typingStats.map(stat => new Date(stat.start_timestamp).toLocaleDateString()),
-		datasets: [
-			{
-				label: 'Accuracy',
-				data: typingStats.map(stat => stat.chunk_stats.accuracy),
-				borderColor: 'rgba(153, 102, 255, 1)',
-				backgroundColor: 'rgba(153, 102, 255, 0.2)',
-			},
-		],
-	};
-
 	if (error) {
 		return <div>Error: {error}</div>;
 	}
 
 	return (
-		<div>
+		<div className="flex flex-col items-center justify-items-center min-h-screen gap-16 sm:p-20 font-[family-name:var(--font-space-mono-regular)] bg-background">
 			<h1>Typing Statistics</h1>
-			<div>
-				<h2>Words Per Minute (WPM)</h2>
-				<Line data={wpmData} />
-			</div>
-			<div>
-				<h2>Accuracy</h2>
-				<Line data={accuracyData} />
-			</div>
+			<ChunkWPMGraph typingStats={typingStats} />
+			<ChunkAccuracyGraph typingStats={typingStats} />
 		</div>
 	);
 };
