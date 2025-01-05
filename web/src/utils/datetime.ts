@@ -7,10 +7,10 @@ export function convertTimestampsToISO(obj: any): any {
 		const newObj: { [key: string]: any } = {};
 		for (const key in obj) {
 			if (obj.hasOwnProperty(key)) {
-				if (typeof obj[key] === 'number' && key.toLowerCase().includes('timestamp')) {
-					newObj[key] = new Date(obj[key]).toISOString();
+				if ((key.toLowerCase().includes('timestamp')) || (typeof obj[key] === 'object' && obj[key] !== null)) {
+					newObj[key] = convertTimestampsToISO(obj[key]);
 				} else {
-					newObj[key] = convertTimestampsToISO(obj[key]); // Recurse without key check
+					newObj[key] = obj[key];
 				}
 			}
 		}
