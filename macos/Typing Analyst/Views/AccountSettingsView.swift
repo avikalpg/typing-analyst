@@ -9,6 +9,7 @@ import SwiftUI
 
 struct AccountSettingsView: View {
     @Binding var isLoggedIn: Bool
+    @State private var errorMessage: String? = nil
 
     var body: some View {
         VStack {
@@ -21,10 +22,16 @@ struct AccountSettingsView: View {
                             isLoggedIn = false // Correct: Directly assign to isLoggedIn
                         case .failure(let error):
                             print("Logout failed:", error)
-                            // Handle logout error
+                            errorMessage = error.localizedDescription
                         }
                     }
                 }
+            }
+            .padding(.top)
+            if let errorMessage = errorMessage {
+                Text(errorMessage)
+                    .foregroundColor(.red)
+                    .padding(.bottom)
             }
         }
         .frame(width: 800)
