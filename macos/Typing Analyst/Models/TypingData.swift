@@ -45,30 +45,14 @@ struct ChunkStats: Encodable {
 
 extension TypingData {
     func toKeyValueData() -> [String: Any]? {
-        guard let data = try? JSONEncoder().encode(self),
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .millisecondsSince1970
+        guard let data = try? encoder.encode(self),
               let jsonObject = try? JSONSerialization.jsonObject(with: data, options: []),
-              var dictionary = jsonObject as? [String: Any] else {
+              let dictionary = jsonObject as? [String: Any] else {
             return nil
         }
-        // Convert Date objects to milliseconds since epoch
-        for (key, value) in dictionary {
-            if let date = value as? Date {
-                dictionary[key] = Int64(date.timeIntervalSince1970 * 1000)
-            } else if let array = value as? [Any] { // Handle arrays of PerSecondDataPoint
-                var newArray: [[String: Any]] = []
-                for item in array {
-                    if var itemDict = item as? [String: Any] {
-                        for (itemKey, itemValue) in itemDict {
-                            if let itemDate = itemValue as? Date {
-                                itemDict[itemKey] = Int64(itemDate.timeIntervalSince1970 * 1000)
-                            }
-                        }
-                        newArray.append(itemDict)
-                    }
-                }
-                dictionary[key] = newArray
-            }
-        }
+        print("[TypingData/toKeyValueData] \(dictionary) ")
         return dictionary
     }
 }
