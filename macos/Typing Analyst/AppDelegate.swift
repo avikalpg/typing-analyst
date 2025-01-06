@@ -18,6 +18,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @State private var wpm: Double = 0
     @State private var cpm: Double = 0
     @State private var accuracy: Double = 0
+    
+    private var _cancellables: Set<AnyCancellable> = []
+    var cancellables: Set<AnyCancellable> {
+        get { _cancellables }
+        set { _cancellables = newValue }
+    }
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         setupStatusItem()
@@ -42,6 +48,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationWillTerminate(_ notification: Notification) {
         stopGlobalKeyCapture()
+        _cancellables.forEach { $0.cancel() }
     }
 
     private func setupStatusItem() {

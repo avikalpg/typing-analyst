@@ -17,8 +17,7 @@ class ViewModel: ObservableObject {
     @Published var wpm: Double = 0
     @Published var cpm: Double = 0
     @Published var accuracy: Double = 0
-    private var keystrokes: [Keystroke] = []
-    var cancellables = Set<AnyCancellable>() // Store cancellables
+    private(set) var keystrokes: [Keystroke] = []
 
     // for adding graph over time
     @Published var wpmData: [(x: Date, y: Double)] = []
@@ -30,7 +29,9 @@ class ViewModel: ObservableObject {
     init(preferences: AppPreferences, typingDataSender: TypingDataSender) {
         self.preferences = preferences
         self.typingDataSender = typingDataSender
-        startTimer()
+        DispatchQueue.main.async {
+            self.startTimer()
+        }
     }
 
     deinit {
@@ -39,16 +40,22 @@ class ViewModel: ObservableObject {
 
     func updatePreferences() {
         chartDataCapacity = Int(preferences.chartTimeWindow / preferences.updateFrequency)
-        cancellables.forEach{ $0.cancel() }
         startTimer()
     }
     
     func startTimer() {
+        guard let appDelegate = NSApp.delegate as? AppDelegate else {
+            // TODO: Handle the case where the app delegate is nil (e.g., during testing)
+            print("AppDelegate is nil. Timer will not start.")
+            return
+        }
+        
         Timer.publish(every: preferences.updateFrequency, on: .main, in: .common)
             .autoconnect()
             .sink { [weak self] _ in
                 self?.update()
-            }.store(in: &cancellables) // Store the cancellable here
+            }
+            .store(in: &appDelegate.cancellables) // Store the cancellable here
     }
 
     func addKeystroke(keystroke: Keystroke) {
