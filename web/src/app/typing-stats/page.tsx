@@ -83,9 +83,11 @@ const TypingStatsPage: React.FC = () => {
 	}
 
 	return (
-		<div className="flex flex-col items-center justify-items-center min-h-screen gap-16 sm:px-20 sm:py-4 font-[family-name:var(--font-space-mono-regular)] bg-background">
-			<h1 className="text-xl">Typing Statistics</h1>
-			<caption className='text-center'>For the {eligibleChunks.length} chunks (out of {typingStats.length} total) that have more than 5 words</caption>
+		<div className="flex flex-col items-center justify-items-center min-h-screen gap-12 sm:px-20 sm:py-4 font-[family-name:var(--font-space-mono-regular)] bg-background">
+			<div className='w-3/4 flex flex-col items-center justify-center gap-4'>
+				<h1 className="text-center text-xl w-full">Typing Statistics</h1>
+				<caption className='text-center w-full'>For the {eligibleChunks.length} chunks (out of {typingStats.length} total) that have more than 5 words</caption>
+			</div>
 			<section className='flex justify-evenly w-full flex-wrap gap-6'>
 				<BigNumber
 					number={eligibleChunks.reduce((acc, stat) => acc + stat.chunk_stats.totalWords, 0) / eligibleChunks.length || 0}
@@ -110,8 +112,10 @@ const TypingStatsPage: React.FC = () => {
 					description="Average Typing Accuracy"
 				/>
 			</section>
-			<ChunkWPMGraph typingStats={typingStats} />
-			<ChunkAccuracyGraph typingStats={typingStats} />
+			<section className='flex w-full flex-wrap align-middle justify-evenly'>
+				<ChunkWPMGraph typingStats={eligibleChunks} className='min-w-80 w-1/2 px-2' />
+				<ChunkAccuracyGraph typingStats={eligibleChunks} className='min-w-80 w-1/2 px-2' />
+			</section>
 		</div>
 	);
 };

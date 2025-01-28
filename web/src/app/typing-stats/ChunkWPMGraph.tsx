@@ -3,7 +3,7 @@
 import { Line } from "react-chartjs-2";
 import { TypingStat } from "./page";
 
-const ChunkWPMGraph: React.FC<{ typingStats: TypingStat[] }> = ({ typingStats }) => {
+const ChunkWPMGraph: React.FC<{ typingStats: TypingStat[] } & React.HTMLAttributes<HTMLDivElement>> = ({ typingStats, ...props }) => {
 	const getWpmDataFromTypingStats = (typingStats: TypingStat[]) => {
 		return {
 			labels: typingStats.map(stat => new Date(stat.start_timestamp).toLocaleTimeString()),
@@ -29,11 +29,10 @@ const ChunkWPMGraph: React.FC<{ typingStats: TypingStat[] }> = ({ typingStats })
 		},
 	};
 	return (
-		<div className='w-full'>
+		<div className='w-full' {...props}>
 			<h2>Words Per Minute (WPM)</h2>
 			<Line data={chartData} options={options} />
 		</div>
 	);
 }
-
 export default ChunkWPMGraph;
