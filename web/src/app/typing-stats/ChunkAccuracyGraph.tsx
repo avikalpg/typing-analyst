@@ -3,7 +3,7 @@
 import { Line } from "react-chartjs-2";
 import { TypingStat } from "./page";
 
-const ChunkAccuracyGraph: React.FC<{ typingStats: TypingStat[] }> = ({ typingStats }) => {
+const ChunkAccuracyGraph: React.FC<{ typingStats: TypingStat[] } & React.HTMLAttributes<HTMLDivElement>> = ({ typingStats, ...props }) => {
 	const getAccuracyDataFromTypingStats = (typingStats: TypingStat[]) => ({
 		labels: typingStats.map(stat => new Date(stat.start_timestamp).toLocaleTimeString()),
 		datasets: [
@@ -25,7 +25,7 @@ const ChunkAccuracyGraph: React.FC<{ typingStats: TypingStat[] }> = ({ typingSta
 		},
 	};
 	return (
-		<div className='w-full'>
+		<div className='w-full' {...props}>
 			<h2>Accuracy</h2>
 			<Line data={chartData} options={options} />
 		</div>
