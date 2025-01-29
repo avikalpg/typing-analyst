@@ -2,19 +2,26 @@
 
 import { Line } from "react-chartjs-2";
 import { Chart } from "chart.js";
+import 'chart.js/auto';
+import { TimeScale } from "chart.js";
+import 'chartjs-adapter-date-fns';
+import { enUS } from 'date-fns/locale';
 import { TypingStat } from "./page";
+
+Chart.register(TimeScale);
 
 const ChunkWPMGraph: React.FC<{ typingStats: TypingStat[] } & React.HTMLAttributes<HTMLDivElement>> = ({ typingStats, ...props }) => {
 	const secondaryColor = window.getComputedStyle(document.documentElement).getPropertyValue('--secondary');
 
 	const getWpmDataFromTypingStats = (typingStats: TypingStat[]) => {
 		const statsByDay = typingStats.reduce((acc, stat) => {
-			const date = new Date(stat.start_timestamp).toLocaleDateString();
+			const date = new Date(stat.start_timestamp);
+			const dateKey = date.toISOString().split('T')[0];
 			const wpm = stat.chunk_stats.totalWords * 60000 / (new Date(stat.end_timestamp).valueOf() - new Date(stat.start_timestamp).valueOf());
-			if (!acc[date]) {
-				acc[date] = [];
+			if (!acc[dateKey]) {
+				acc[dateKey] = [];
 			}
-			acc[date].push(wpm);
+			acc[dateKey].push(wpm);
 			return acc;
 		}, {} as Record<string, number[]>);
 
@@ -29,11 +36,14 @@ const ChunkWPMGraph: React.FC<{ typingStats: TypingStat[] } & React.HTMLAttribut
 		const stats = dates.map(date => calculateStats(statsByDay[date]));
 
 		return {
-			labels: dates,
+			labels: dates.map(date => new Date(date)),
 			datasets: [
 				{
 					label: 'Mean WPM',
-					data: stats.map(stat => stat.mean),
+					data: dates.map((date, i) => ({
+						x: new Date(date),
+						y: stats[i].mean
+					})),
 					fill: false,
 					borderColor: secondaryColor,
 					backgroundColor: secondaryColor + 20,
@@ -42,7 +52,10 @@ const ChunkWPMGraph: React.FC<{ typingStats: TypingStat[] } & React.HTMLAttribut
 				},
 				{
 					label: 'WPM Range (Upper)',
-					data: stats.map(stat => stat.mean + stat.stdDev),
+					data: dates.map((date, i) => ({
+						x: new Date(date),
+						y: stats[i].mean + stats[i].stdDev
+					})),
 					fill: 'stack',
 					borderColor: 'transparent',
 					backgroundColor: secondaryColor + 40,
@@ -51,7 +64,10 @@ const ChunkWPMGraph: React.FC<{ typingStats: TypingStat[] } & React.HTMLAttribut
 				},
 				{
 					label: 'WPM Range (Lower)',
-					data: stats.map(stat => stat.mean - stat.stdDev),
+					data: dates.map((date, i) => ({
+						x: new Date(date),
+						y: stats[i].mean - stats[i].stdDev
+					})),
 					fill: '-2',
 					borderColor: 'transparent',
 					backgroundColor: secondaryColor + 40,
@@ -61,10 +77,22 @@ const ChunkWPMGraph: React.FC<{ typingStats: TypingStat[] } & React.HTMLAttribut
 			],
 		}
 	};
-
 	const chartData = getWpmDataFromTypingStats(typingStats);
 	const options = {
 		scales: {
+			x: {
+				type: 'time' as const,
+				time: {
+					unit: 'day' as const,
+					displayFormats: {
+						day: 'MMM d'
+					}
+				},
+				ticks: {
+					source: 'auto' as const,
+					autoSkip: false
+				}
+			},
 			y: {
 				beginAtZero: true,
 			},
@@ -81,7 +109,7 @@ const ChunkWPMGraph: React.FC<{ typingStats: TypingStat[] } & React.HTMLAttribut
 						const lowerRange = allDatasets[2].data[context.dataIndex];
 
 						if (datasetIndex === 0 || datasetIndex === 1 || datasetIndex === 2) {
-							return `Mean WPM: ${meanWPM.toFixed(1)} (${lowerRange.toFixed(1)} - ${upperRange.toFixed(1)}) [${chunksCount} chunks]`;
+							return `Mean WPM: ${meanWPM.y.toFixed(1)} (${lowerRange.y.toFixed(1)} - ${upperRange.y.toFixed(1)}) [${chunksCount} chunks]`;
 						}
 					}
 				}
