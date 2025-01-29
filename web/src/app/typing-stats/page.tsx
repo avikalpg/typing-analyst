@@ -86,7 +86,7 @@ const TypingStatsPage: React.FC = () => {
 		<div className="flex flex-col items-center justify-items-center min-h-screen gap-12 sm:px-20 sm:py-4 font-[family-name:var(--font-space-mono-regular)] bg-background">
 			<div className='w-3/4 flex flex-col items-center justify-center gap-4'>
 				<h1 className="text-center text-xl w-full">Typing Statistics</h1>
-				<caption className='text-center w-full'>For the {eligibleChunks.length} chunks (out of {typingStats.length} total) that have more than 5 words</caption>
+				<p className='text-center w-full'>For the {eligibleChunks.length} chunks (out of {typingStats.length} total) that have more than 5 words</p>
 			</div>
 			<section className='flex justify-evenly w-full flex-wrap gap-6'>
 				<BigNumber
