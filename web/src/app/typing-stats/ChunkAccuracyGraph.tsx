@@ -6,11 +6,19 @@ import 'chart.js/auto';
 import { TimeScale } from "chart.js";
 import 'chartjs-adapter-date-fns';
 import { TypingStat } from "./page";
+import { useEffect, useState } from "react";
 
 Chart.register(TimeScale);
 
 const ChunkAccuracyGraph: React.FC<{ typingStats: TypingStat[] } & React.HTMLAttributes<HTMLDivElement>> = ({ typingStats, ...props }) => {
-	const primaryColor = window.getComputedStyle(document.documentElement).getPropertyValue('--primary');
+	const [graphColor, setGraphColor] = useState<string>('rgba(153, 102, 255, 1)');
+
+	useEffect(() => {
+		if (typeof window !== 'undefined') {
+			const color = window.getComputedStyle(document.documentElement).getPropertyValue('--primary');
+			setGraphColor(color);
+		}
+	}, []);
 
 	type CustomChartDataset = ChartDataset<'line'> & { chunksCount?: number[] };
 
@@ -46,8 +54,8 @@ const ChunkAccuracyGraph: React.FC<{ typingStats: TypingStat[] } & React.HTMLAtt
 						y: stats[i].mean
 					})),
 					fill: false,
-					borderColor: primaryColor,
-					backgroundColor: primaryColor + 20,
+					borderColor: graphColor,
+					backgroundColor: graphColor + 20,
 					tension: 0.1,
 					chunksCount: stats.map(stat => stat.count),
 				} as CustomChartDataset,
@@ -59,7 +67,7 @@ const ChunkAccuracyGraph: React.FC<{ typingStats: TypingStat[] } & React.HTMLAtt
 					})),
 					fill: 'stack',
 					borderColor: 'transparent',
-					backgroundColor: primaryColor + 40,
+					backgroundColor: graphColor + 40,
 					tension: 0.1,
 					chunksCount: stats.map(stat => stat.count),
 				} as CustomChartDataset,
@@ -71,7 +79,7 @@ const ChunkAccuracyGraph: React.FC<{ typingStats: TypingStat[] } & React.HTMLAtt
 					})),
 					fill: '-2',
 					borderColor: 'transparent',
-					backgroundColor: primaryColor + 40,
+					backgroundColor: graphColor + 40,
 					tension: 0.1,
 					chunksCount: stats.map(stat => stat.count),
 				} as CustomChartDataset,
