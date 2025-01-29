@@ -1,9 +1,12 @@
 "use client";
 
 import { Line } from "react-chartjs-2";
+import { Chart } from "chart.js";
 import { TypingStat } from "./page";
 
 const ChunkWPMGraph: React.FC<{ typingStats: TypingStat[] } & React.HTMLAttributes<HTMLDivElement>> = ({ typingStats, ...props }) => {
+	const secondaryColor = window.getComputedStyle(document.documentElement).getPropertyValue('--secondary');
+
 	const getWpmDataFromTypingStats = (typingStats: TypingStat[]) => {
 		const statsByDay = typingStats.reduce((acc, stat) => {
 			const date = new Date(stat.start_timestamp).toLocaleDateString();
@@ -32,17 +35,26 @@ const ChunkWPMGraph: React.FC<{ typingStats: TypingStat[] } & React.HTMLAttribut
 					label: 'Mean WPM',
 					data: stats.map(stat => stat.mean),
 					fill: false,
-					borderColor: 'rgba(75, 192, 192, 1)',
-					backgroundColor: 'rgba(75, 192, 192, 0.2)',
+					borderColor: secondaryColor,
+					backgroundColor: secondaryColor + 20,
 					tension: 0.1,
 					chunksCount: stats.map(stat => stat.count),
 				},
 				{
-					label: 'WPM Range (±1 StdDev)',
-					data: stats.map(stat => stat.stdDev),
-					fill: true,
+					label: 'WPM Range (Upper)',
+					data: stats.map(stat => stat.mean + stat.stdDev),
+					fill: 'stack',
 					borderColor: 'transparent',
-					backgroundColor: 'rgba(75, 192, 192, 0.1)',
+					backgroundColor: secondaryColor + 40,
+					tension: 0.1,
+					chunksCount: stats.map(stat => stat.count),
+				},
+				{
+					label: 'WPM Range (Lower)',
+					data: stats.map(stat => stat.mean - stat.stdDev),
+					fill: '-2',
+					borderColor: 'transparent',
+					backgroundColor: secondaryColor + 40,
 					tension: 0.1,
 					chunksCount: stats.map(stat => stat.count),
 				},
@@ -62,11 +74,29 @@ const ChunkWPMGraph: React.FC<{ typingStats: TypingStat[] } & React.HTMLAttribut
 				callbacks: {
 					label: (context: any) => {
 						const chunksCount = context.dataset.chunksCount[context.dataIndex];
-						if (context.datasetIndex === 0) {
-							return `Mean WPM: ${context.raw.toFixed(1)} (${chunksCount} chunks)`;
-						} else {
-							return `Standard Deviation: ±${context.raw.toFixed(1)} (${chunksCount} chunks)`;
+						const datasetIndex = context.datasetIndex;
+						const allDatasets = context.chart.data.datasets;
+						const meanWPM = allDatasets[0].data[context.dataIndex];
+						const upperRange = allDatasets[1].data[context.dataIndex];
+						const lowerRange = allDatasets[2].data[context.dataIndex];
+
+						if (datasetIndex === 0 || datasetIndex === 1 || datasetIndex === 2) {
+							return `Mean WPM: ${meanWPM.toFixed(1)} (${lowerRange.toFixed(1)} - ${upperRange.toFixed(1)}) [${chunksCount} chunks]`;
 						}
+					}
+				}
+			},
+			legend: {
+				labels: {
+					filter: (item: any) => item.text !== 'WPM Range (Lower)',
+					generateLabels: (chart: any) => {
+						const labels = Chart.defaults.plugins.legend.labels.generateLabels(chart)
+						return labels.map(label => {
+							if (label.text === 'WPM Range (Upper)') {
+								label.text = 'WPM Variance (±1 StdDev)'
+							}
+							return label
+						})
 					}
 				}
 			}
