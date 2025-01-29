@@ -1,7 +1,7 @@
 "use client";
 
 import { Line } from "react-chartjs-2";
-import { Chart } from "chart.js";
+import { Chart, TooltipItem, LegendItem, ChartDataset } from "chart.js";
 import 'chart.js/auto';
 import { TimeScale } from "chart.js";
 import 'chartjs-adapter-date-fns';
@@ -11,6 +11,8 @@ Chart.register(TimeScale);
 
 const ChunkAccuracyGraph: React.FC<{ typingStats: TypingStat[] } & React.HTMLAttributes<HTMLDivElement>> = ({ typingStats, ...props }) => {
 	const primaryColor = window.getComputedStyle(document.documentElement).getPropertyValue('--primary');
+
+	type CustomChartDataset = ChartDataset<'line'> & { chunksCount?: number[] };
 
 	const getAccuracyDataFromTypingStats = (typingStats: TypingStat[]) => {
 		const statsByDay = typingStats.reduce((acc, stat) => {
@@ -40,7 +42,7 @@ const ChunkAccuracyGraph: React.FC<{ typingStats: TypingStat[] } & React.HTMLAtt
 				{
 					label: 'Mean Accuracy',
 					data: dates.map((date, i) => ({
-						x: new Date(date),
+						x: new Date(date).getTime(),
 						y: stats[i].mean
 					})),
 					fill: false,
@@ -48,11 +50,11 @@ const ChunkAccuracyGraph: React.FC<{ typingStats: TypingStat[] } & React.HTMLAtt
 					backgroundColor: primaryColor + 20,
 					tension: 0.1,
 					chunksCount: stats.map(stat => stat.count),
-				},
+				} as CustomChartDataset,
 				{
 					label: 'Accuracy Range (Upper)',
 					data: dates.map((date, i) => ({
-						x: new Date(date),
+						x: new Date(date).getTime(),
 						y: stats[i].mean + stats[i].stdDev
 					})),
 					fill: 'stack',
@@ -60,11 +62,11 @@ const ChunkAccuracyGraph: React.FC<{ typingStats: TypingStat[] } & React.HTMLAtt
 					backgroundColor: primaryColor + 40,
 					tension: 0.1,
 					chunksCount: stats.map(stat => stat.count),
-				},
+				} as CustomChartDataset,
 				{
 					label: 'Accuracy Range (Lower)',
 					data: dates.map((date, i) => ({
-						x: new Date(date),
+						x: new Date(date).getTime(),
 						y: stats[i].mean - stats[i].stdDev
 					})),
 					fill: '-2',
@@ -72,7 +74,7 @@ const ChunkAccuracyGraph: React.FC<{ typingStats: TypingStat[] } & React.HTMLAtt
 					backgroundColor: primaryColor + 40,
 					tension: 0.1,
 					chunksCount: stats.map(stat => stat.count),
-				},
+				} as CustomChartDataset,
 			],
 		}
 	};
@@ -100,13 +102,13 @@ const ChunkAccuracyGraph: React.FC<{ typingStats: TypingStat[] } & React.HTMLAtt
 		plugins: {
 			tooltip: {
 				callbacks: {
-					label: (context: any) => {
-						const chunksCount = context.dataset.chunksCount[context.dataIndex];
+					label: (context: TooltipItem<'line'>) => {
+						const chunksCount = (context.dataset as CustomChartDataset).chunksCount?.[context.dataIndex];
 						const datasetIndex = context.datasetIndex;
 						const allDatasets = context.chart.data.datasets;
-						const meanAccuracy = allDatasets[0].data[context.dataIndex];
-						const upperRange = allDatasets[1].data[context.dataIndex];
-						const lowerRange = allDatasets[2].data[context.dataIndex];
+						const meanAccuracy = allDatasets[0].data[context.dataIndex] as unknown as { x: Date, y: number };
+						const upperRange = allDatasets[1].data[context.dataIndex] as unknown as { x: Date, y: number };
+						const lowerRange = allDatasets[2].data[context.dataIndex] as unknown as { x: Date, y: number };
 
 						if (datasetIndex === 0 || datasetIndex === 1 || datasetIndex === 2) {
 							return `Mean Accuracy: ${meanAccuracy.y.toFixed(1)}% (${lowerRange.y.toFixed(1)}% - ${upperRange.y.toFixed(1)}%) [${chunksCount} chunks]`;
@@ -116,8 +118,8 @@ const ChunkAccuracyGraph: React.FC<{ typingStats: TypingStat[] } & React.HTMLAtt
 			},
 			legend: {
 				labels: {
-					filter: (item: any) => item.text !== 'Accuracy Range (Lower)',
-					generateLabels: (chart: any) => {
+					filter: (item: LegendItem) => item.text !== 'Accuracy Range (Lower)',
+					generateLabels: (chart: Chart) => {
 						const labels = Chart.defaults.plugins.legend.labels.generateLabels(chart)
 						return labels.map(label => {
 							if (label.text === 'Accuracy Range (Upper)') {
