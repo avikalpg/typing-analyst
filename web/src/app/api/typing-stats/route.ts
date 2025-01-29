@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/utils/supabaseClient';
-import { Json } from '../../../../database.types';
+import { Json } from '../../../../types/database.types';
 import { convertTimestampsToISO } from '@/utils/datetime';
 
 type TypingStat = {

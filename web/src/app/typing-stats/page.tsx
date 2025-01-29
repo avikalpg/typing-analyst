@@ -5,6 +5,7 @@ import 'chart.js/auto';
 import ChunkWPMGraph from './ChunkWPMGraph';
 import ChunkAccuracyGraph from './ChunkAccuracyGraph';
 import BigNumber from './BigNumber';
+import { SummaryStats } from '../../../types/query.types';
 
 export type TypingStat = {
 	start_timestamp: string;
@@ -37,12 +38,11 @@ export type PerSecondData = {
 };
 
 const TypingStatsPage: React.FC = () => {
-	const [typingStats, setTypingStats] = useState<TypingStat[]>([]);
-	const [eligibleChunks, setEligibleChunks] = useState<TypingStat[]>([]);
+	const [summary, setSummary] = useState<SummaryStats | null>(null);
 	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
-		const fetchTypingStats = async () => {
+		const fetchTypingStatsSummary = async () => {
 			const userId = localStorage.getItem('userId');
 
 			if (!userId) {
@@ -51,7 +51,7 @@ const TypingStatsPage: React.FC = () => {
 				return;
 			}
 
-			const response = await fetch('/api/typing-stats', {
+			const response = await fetch('/api/typing-stats/summary', {
 				method: 'GET',
 				headers: {
 					'Content-Type': 'application/json',
@@ -70,16 +70,12 @@ const TypingStatsPage: React.FC = () => {
 				return;
 			}
 
-			const data = await response.json();
-			setTypingStats(data.data);
+			const data: { data: SummaryStats[] } = await response.json();
+			setSummary(data.data[0]);
 		};
 
-		fetchTypingStats();
+		fetchTypingStatsSummary();
 	}, []);
-
-	useEffect(() => {
-		setEligibleChunks(typingStats.filter(stat => stat.chunk_stats.totalWords >= 5));
-	}, [typingStats]);
 
 	if (error) {
 		return <div>Error: {error}</div>;
@@ -89,34 +85,16 @@ const TypingStatsPage: React.FC = () => {
 		<div className="flex flex-col items-center justify-items-center min-h-screen gap-12 sm:px-20 sm:py-4 font-[family-name:var(--font-space-mono-regular)] bg-background">
 			<div className='w-3/4 flex flex-col items-center justify-center gap-4'>
 				<h1 className="text-center text-xl w-full">Typing Statistics</h1>
-				<p className='text-center w-full'>For the {eligibleChunks.length} chunks (out of {typingStats.length} total) that have more than 5 words</p>
+				<p className='text-center w-full'>For the {summary?.chunks_5_words} chunks (out of {summary?.total_chunks} total) that have more than 5 words</p>
 			</div>
 			<section className='flex justify-evenly w-full flex-wrap gap-6'>
-				<BigNumber
-					number={eligibleChunks.reduce((acc, stat) => acc + stat.chunk_stats.totalWords, 0) / eligibleChunks.length || 0}
-					units="words"
-					description="Average Words per Chunk"
-				/>
-				<BigNumber
-					number={eligibleChunks.reduce((acc, stat) => {
-						const chunkStart = new Date(stat.start_timestamp);
-						const chunkEnd = new Date(stat.end_timestamp);
-						const chunkDurationMin = (chunkEnd.getTime() - chunkStart.getTime()) / (1000 * 60)
-						const chunkSpeed = stat.chunk_stats.totalWords / chunkDurationMin
-						return acc + chunkSpeed;
-					}, 0) / eligibleChunks.length || 0}
-					units="WPM"
-					description="Average Typing Speed"
-				/>
-				<BigNumber
-					number={parseFloat((eligibleChunks.reduce((acc, stat) => acc + stat.chunk_stats.accuracy, 0) / eligibleChunks.length || 0).toFixed(2))}
-					units="%"
-					description="Average Typing Accuracy"
-				/>
+				<BigNumber number={summary?.avg_words ?? NaN} units="words" description="Average Words per Chunk" />
+				<BigNumber number={summary?.avg_speed ?? NaN} units="WPM" description="Average Typing Speed" />
+				<BigNumber number={summary?.avg_accuracy ?? NaN} units="%" description="Average Typing Accuracy" />
 			</section>
 			<section className='flex w-full flex-wrap align-middle justify-evenly'>
-				<ChunkWPMGraph typingStats={eligibleChunks} className='min-w-80 w-1/2 px-2' />
-				<ChunkAccuracyGraph typingStats={eligibleChunks} className='min-w-80 w-1/2 px-2' />
+				{/* <ChunkWPMGraph typingStats={eligibleChunks} className='min-w-80 w-1/2 px-2' />
+				<ChunkAccuracyGraph typingStats={eligibleChunks} className='min-w-80 w-1/2 px-2' /> */}
 			</section>
 		</div>
 	);
