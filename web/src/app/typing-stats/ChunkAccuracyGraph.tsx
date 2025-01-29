@@ -5,12 +5,12 @@ import { Chart, TooltipItem, LegendItem, ChartDataset } from "chart.js";
 import 'chart.js/auto';
 import { TimeScale } from "chart.js";
 import 'chartjs-adapter-date-fns';
-import { TypingStat } from "./page";
 import { useEffect, useState } from "react";
+import { DailyStats } from "../../../types/query.types";
 
 Chart.register(TimeScale);
 
-const ChunkAccuracyGraph: React.FC<{ typingStats: TypingStat[] } & React.HTMLAttributes<HTMLDivElement>> = ({ typingStats, ...props }) => {
+const ChunkAccuracyGraph: React.FC<{ dailyTypingStats: DailyStats[] } & React.HTMLAttributes<HTMLDivElement>> = ({ dailyTypingStats, ...props }) => {
 	const [graphColor, setGraphColor] = useState<string>('rgba(153, 102, 255, 1)');
 
 	useEffect(() => {
@@ -22,72 +22,64 @@ const ChunkAccuracyGraph: React.FC<{ typingStats: TypingStat[] } & React.HTMLAtt
 
 	type CustomChartDataset = ChartDataset<'line'> & { chunksCount?: number[] };
 
-	const getAccuracyDataFromTypingStats = (typingStats: TypingStat[]) => {
-		const statsByDay = typingStats.reduce((acc, stat) => {
-			const date = new Date(stat.start_timestamp);
-			const dateKey = date.toISOString().split('T')[0];
-			const accuracy = stat.chunk_stats.accuracy;
-			if (!acc[dateKey]) {
-				acc[dateKey] = [];
-			}
-			acc[dateKey].push(accuracy);
-			return acc;
-		}, {} as Record<string, number[]>);
+	const getAccuracyDataFromTypingStats = (dailyStatsList: DailyStats[]) => {
+		const statsByDay: Record<string, { mean: number, stdDev: number, count: number }> = {};
 
-		const calculateStats = (values: number[]) => {
-			const mean = values.reduce((sum, val) => sum + val, 0) / values.length;
-			const variance = values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / values.length;
-			const stdDev = Math.sqrt(variance);
-			return { mean, stdDev, count: values.length };
-		};
+		dailyStatsList.forEach(dailyStat => {
+			const date = dailyStat.date;
+			statsByDay[date] = {
+				mean: dailyStat.avg_accuracy,
+				stdDev: dailyStat.stddev_accuracy,
+				count: dailyStat.total_chunks,
+			};
+		});
 
 		const dates = Object.keys(statsByDay).sort();
-		const stats = dates.map(date => calculateStats(statsByDay[date]));
 
 		return {
 			labels: dates.map(date => new Date(date)),
 			datasets: [
 				{
 					label: 'Mean Accuracy',
-					data: dates.map((date, i) => ({
+					data: dates.map((date) => ({
 						x: new Date(date).getTime(),
-						y: stats[i].mean
+						y: statsByDay[date].mean
 					})),
 					fill: false,
 					borderColor: graphColor,
 					backgroundColor: graphColor + 20,
 					tension: 0.1,
-					chunksCount: stats.map(stat => stat.count),
+					chunksCount: dates.map(date => statsByDay[date].count),
 				} as CustomChartDataset,
 				{
 					label: 'Accuracy Range (Upper)',
-					data: dates.map((date, i) => ({
+					data: dates.map((date) => ({
 						x: new Date(date).getTime(),
-						y: stats[i].mean + stats[i].stdDev
+						y: statsByDay[date].mean + statsByDay[date].stdDev
 					})),
 					fill: 'stack',
 					borderColor: 'transparent',
 					backgroundColor: graphColor + 40,
 					tension: 0.1,
-					chunksCount: stats.map(stat => stat.count),
+					chunksCount: dates.map(date => statsByDay[date].count),
 				} as CustomChartDataset,
 				{
 					label: 'Accuracy Range (Lower)',
-					data: dates.map((date, i) => ({
+					data: dates.map((date) => ({
 						x: new Date(date).getTime(),
-						y: stats[i].mean - stats[i].stdDev
+						y: statsByDay[date].mean - statsByDay[date].stdDev
 					})),
 					fill: '-2',
 					borderColor: 'transparent',
 					backgroundColor: graphColor + 40,
 					tension: 0.1,
-					chunksCount: stats.map(stat => stat.count),
+					chunksCount: dates.map(date => statsByDay[date].count),
 				} as CustomChartDataset,
 			],
 		}
 	};
 
-	const chartData = getAccuracyDataFromTypingStats(typingStats);
+	const chartData = getAccuracyDataFromTypingStats(dailyTypingStats);
 	const options = {
 		scales: {
 			x: {
