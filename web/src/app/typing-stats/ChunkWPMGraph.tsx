@@ -19,10 +19,10 @@ const ChunkWPMGraph: React.FC<{ typingStats: TypingStat[] } & React.HTMLAttribut
 			const mean = values.reduce((sum, val) => sum + val, 0) / values.length;
 			const variance = values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / values.length;
 			const stdDev = Math.sqrt(variance);
-			return { mean, stdDev };
+			return { mean, stdDev, count: values.length };
 		};
 
-		const dates = Object.keys(statsByDay);
+		const dates = Object.keys(statsByDay).sort();
 		const stats = dates.map(date => calculateStats(statsByDay[date]));
 
 		return {
@@ -35,6 +35,7 @@ const ChunkWPMGraph: React.FC<{ typingStats: TypingStat[] } & React.HTMLAttribut
 					borderColor: 'rgba(75, 192, 192, 1)',
 					backgroundColor: 'rgba(75, 192, 192, 0.2)',
 					tension: 0.1,
+					chunksCount: stats.map(stat => stat.count),
 				},
 				{
 					label: 'WPM Range (±1 StdDev)',
@@ -43,6 +44,7 @@ const ChunkWPMGraph: React.FC<{ typingStats: TypingStat[] } & React.HTMLAttribut
 					borderColor: 'transparent',
 					backgroundColor: 'rgba(75, 192, 192, 0.1)',
 					tension: 0.1,
+					chunksCount: stats.map(stat => stat.count),
 				},
 			],
 		}
@@ -59,10 +61,11 @@ const ChunkWPMGraph: React.FC<{ typingStats: TypingStat[] } & React.HTMLAttribut
 			tooltip: {
 				callbacks: {
 					label: (context: any) => {
+						const chunksCount = context.dataset.chunksCount[context.dataIndex];
 						if (context.datasetIndex === 0) {
-							return `Mean WPM: ${context.raw.toFixed(1)}`;
+							return `Mean WPM: ${context.raw.toFixed(1)} (${chunksCount} chunks)`;
 						} else {
-							return `Standard Deviation: ±${context.raw.toFixed(1)}`;
+							return `Standard Deviation: ±${context.raw.toFixed(1)} (${chunksCount} chunks)`;
 						}
 					}
 				}
