@@ -5,7 +5,7 @@ import 'chart.js/auto';
 import ChunkWPMGraph from './ChunkWPMGraph';
 import ChunkAccuracyGraph from './ChunkAccuracyGraph';
 import BigNumber from './BigNumber';
-import { SummaryStats } from '../../../types/query.types';
+import { DailyStats, SummaryStats } from '../../../types/query.types';
 
 export type TypingStat = {
 	start_timestamp: string;
@@ -39,6 +39,7 @@ export type PerSecondData = {
 
 const TypingStatsPage: React.FC = () => {
 	const [summary, setSummary] = useState<SummaryStats | null>(null);
+	const [dailyStat, setDailyStat] = useState<DailyStats[]>([]);
 	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
@@ -77,6 +78,43 @@ const TypingStatsPage: React.FC = () => {
 		fetchTypingStatsSummary();
 	}, []);
 
+	useEffect(() => {
+		const fetchTypingStatsTimelineByDay = async () => {
+			const userId = localStorage.getItem('userId');
+
+			if (!userId) {
+				setError('Unauthorized');
+				window.location.href = '/login';
+				return;
+			}
+
+			const response = await fetch('/api/typing-stats/daily', {
+				method: 'GET',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+			});
+
+			if (!response.ok) {
+				const errorData = await response.json();
+				if (response.status === 401) {
+					setError('Unauthorized');
+					console.error('Unauthorized: redirecting to login');
+					window.location.href = '/login';
+					return;
+				}
+				setError(errorData.error);
+				return;
+			}
+
+			const data: { data: DailyStats[] } = await response.json();
+			console.log(data.data);
+			setDailyStat(data.data);
+		};
+
+		fetchTypingStatsTimelineByDay();
+	}, []);
+
 	if (error) {
 		return <div>Error: {error}</div>;
 	}
@@ -93,8 +131,8 @@ const TypingStatsPage: React.FC = () => {
 				<BigNumber number={summary?.avg_accuracy ?? NaN} units="%" description="Average Typing Accuracy" />
 			</section>
 			<section className='flex w-full flex-wrap align-middle justify-evenly'>
-				{/* <ChunkWPMGraph typingStats={eligibleChunks} className='min-w-80 w-1/2 px-2' />
-				<ChunkAccuracyGraph typingStats={eligibleChunks} className='min-w-80 w-1/2 px-2' /> */}
+				<ChunkWPMGraph dailyTypingStats={dailyStat} className='min-w-80 w-1/2 px-2' />
+				<ChunkAccuracyGraph dailyTypingStats={dailyStat} className='min-w-80 w-1/2 px-2' />
 			</section>
 		</div>
 	);

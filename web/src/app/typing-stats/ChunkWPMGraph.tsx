@@ -5,88 +5,80 @@ import { Chart, ChartDataset, LegendItem, TooltipItem } from "chart.js";
 import 'chart.js/auto';
 import { TimeScale } from "chart.js";
 import 'chartjs-adapter-date-fns';
-import { TypingStat } from "./page";
 import { useEffect, useState } from "react";
+import { DailyStats } from "../../../types/query.types";
 
 Chart.register(TimeScale);
 
-const ChunkWPMGraph: React.FC<{ typingStats: TypingStat[] } & React.HTMLAttributes<HTMLDivElement>> = ({ typingStats, ...props }) => {
+const ChunkWPMGraph: React.FC<{ dailyTypingStats: DailyStats[] } & React.HTMLAttributes<HTMLDivElement>> = ({ dailyTypingStats, ...props }) => {
 	const [graphColor, setGraphColor] = useState<string>('rgba(75, 192, 192, 1)');
 
 	useEffect(() => {
 		if (typeof window !== 'undefined') {
-			const color = window.getComputedStyle(document.documentElement).getPropertyValue('--secondary');
+			const color = window.getComputedStyle(document.documentElement).getPropertyValue('--accent');
 			setGraphColor(color);
 		}
 	}, []);
 
 	type CustomChartDataset = ChartDataset<'line'> & { chunksCount?: number[] };
 
-	const getWpmDataFromTypingStats = (typingStats: TypingStat[]) => {
-		const statsByDay = typingStats.reduce((acc, stat) => {
-			const date = new Date(stat.start_timestamp);
-			const dateKey = date.toISOString().split('T')[0];
-			const wpm = stat.chunk_stats.totalWords * 60000 / (new Date(stat.end_timestamp).valueOf() - new Date(stat.start_timestamp).valueOf());
-			if (!acc[dateKey]) {
-				acc[dateKey] = [];
-			}
-			acc[dateKey].push(wpm);
-			return acc;
-		}, {} as Record<string, number[]>);
+	const getWpmDataFromTypingStats = (dailyStatsList: DailyStats[]) => {
+		const statsByDay: Record<string, { mean: number, stdDev: number, count: number }> = {};
 
-		const calculateStats = (values: number[]) => {
-			const mean = values.reduce((sum, val) => sum + val, 0) / values.length;
-			const variance = values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / values.length;
-			const stdDev = Math.sqrt(variance);
-			return { mean, stdDev, count: values.length };
-		};
+		dailyStatsList.forEach(dailyStat => {
+			const date = dailyStat.date;
+			statsByDay[date] = {
+				mean: dailyStat.avg_wpm,
+				stdDev: dailyStat.stddev_wpm,
+				count: dailyStat.total_chunks,
+			};
+		});
 
 		const dates = Object.keys(statsByDay).sort();
-		const stats = dates.map(date => calculateStats(statsByDay[date]));
 
 		return {
 			labels: dates.map(date => new Date(date)),
 			datasets: [
 				{
 					label: 'Mean WPM',
-					data: dates.map((date, i) => ({
+					data: dates.map((date) => ({
 						x: new Date(date).getTime(),
-						y: stats[i].mean
+						y: statsByDay[date].mean
 					})),
 					fill: false,
 					borderColor: graphColor,
 					backgroundColor: graphColor + 20,
 					tension: 0.1,
-					chunksCount: stats.map(stat => stat.count),
+					chunksCount: dates.map(date => statsByDay[date].count),
 				} as CustomChartDataset,
 				{
 					label: 'WPM Range (Upper)',
-					data: dates.map((date, i) => ({
+					data: dates.map((date) => ({
 						x: new Date(date).getTime(),
-						y: stats[i].mean + stats[i].stdDev
+						y: statsByDay[date].mean + statsByDay[date].stdDev
 					})),
 					fill: 'stack',
 					borderColor: 'transparent',
 					backgroundColor: graphColor + 40,
 					tension: 0.1,
-					chunksCount: stats.map(stat => stat.count),
+					chunksCount: dates.map(date => statsByDay[date].count),
 				} as CustomChartDataset,
 				{
 					label: 'WPM Range (Lower)',
-					data: dates.map((date, i) => ({
+					data: dates.map((date) => ({
 						x: new Date(date).getTime(),
-						y: stats[i].mean - stats[i].stdDev
+						y: statsByDay[date].mean - statsByDay[date].stdDev
 					})),
 					fill: '-2',
 					borderColor: 'transparent',
 					backgroundColor: graphColor + 40,
 					tension: 0.1,
-					chunksCount: stats.map(stat => stat.count),
+					chunksCount: dates.map(date => statsByDay[date].count),
 				} as CustomChartDataset,
 			],
 		}
 	};
-	const chartData = getWpmDataFromTypingStats(typingStats);
+	const chartData = getWpmDataFromTypingStats(dailyTypingStats);
 	const options = {
 		scales: {
 			x: {

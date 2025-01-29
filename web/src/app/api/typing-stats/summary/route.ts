@@ -5,30 +5,10 @@ import { SummaryStats } from '../../../../../types/query.types';
 
 export async function GET(request: Request) {
 	try {
-		const authRes = await supabase.auth.getUser();
-		console.log(authRes);
-		let { data: { user } } = authRes;
+		const { data: { user } } = await supabase.auth.getUser();
 
 		if (!user) {
-			// return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-			console.warn('[typing-stats/summary] no user found. Placing a fake user id');
-			user = {
-				id: '20683479-157a-4313-a6e4-d7679bd1fbbf',
-				aud: 'authenticated',
-				role: 'authenticated',
-				email: 'avikalpgupta@gmail.com',
-				email_confirmed_at: '2025-01-03T11:08:41.970991Z',
-				phone: '',
-				confirmation_sent_at: '2025-01-03T11:07:54.25743Z',
-				confirmed_at: '2025-01-03T11:08:41.970991Z',
-				recovery_sent_at: '2025-01-08T19:58:40.408458Z',
-				last_sign_in_at: '2025-01-29T11:44:00.986627Z',
-				app_metadata: [Object],
-				user_metadata: [Object],
-				created_at: '2025-01-03T11:07:54.204486Z',
-				updated_at: '2025-01-29T11:44:00.991102Z',
-				is_anonymous: false
-			}
+			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 		}
 
 		const q = `
@@ -36,6 +16,7 @@ export async function GET(request: Request) {
 			(SELECT COUNT(*) FROM typing_stats WHERE user_id = '${user.id}') AS total_chunks,
 			COUNT(*) AS chunks_5_words,
 			AVG((chunk_stats->>'totalWords')::float) AS avg_words,
+			SUM((chunk_stats->>'totalWords')::float) AS total_words,
 			AVG((chunk_stats->>'accuracy')::float) AS avg_accuracy,
 			AVG(
 				(chunk_stats->>'totalWords')::float /
