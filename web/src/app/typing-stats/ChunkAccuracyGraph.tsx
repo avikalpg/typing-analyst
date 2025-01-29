@@ -5,7 +5,6 @@ import { Chart } from "chart.js";
 import 'chart.js/auto';
 import { TimeScale } from "chart.js";
 import 'chartjs-adapter-date-fns';
-import { enUS } from 'date-fns/locale';
 import { TypingStat } from "./page";
 
 Chart.register(TimeScale);

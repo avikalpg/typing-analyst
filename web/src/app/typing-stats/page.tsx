@@ -38,6 +38,7 @@ export type PerSecondData = {
 
 const TypingStatsPage: React.FC = () => {
 	const [typingStats, setTypingStats] = useState<TypingStat[]>([]);
+	const [eligibleChunks, setEligibleChunks] = useState<TypingStat[]>([]);
 	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
@@ -76,7 +77,9 @@ const TypingStatsPage: React.FC = () => {
 		fetchTypingStats();
 	}, []);
 
-	const eligibleChunks = typingStats.filter(stat => stat.chunk_stats.totalWords >= 5);
+	useEffect(() => {
+		setEligibleChunks(typingStats.filter(stat => stat.chunk_stats.totalWords >= 5));
+	}, [typingStats]);
 
 	if (error) {
 		return <div>Error: {error}</div>;
@@ -100,7 +103,6 @@ const TypingStatsPage: React.FC = () => {
 						const chunkEnd = new Date(stat.end_timestamp);
 						const chunkDurationMin = (chunkEnd.getTime() - chunkStart.getTime()) / (1000 * 60)
 						const chunkSpeed = stat.chunk_stats.totalWords / chunkDurationMin
-						// console.log(`chunkSpeed: ${chunkSpeed}`)
 						return acc + chunkSpeed;
 					}, 0) / eligibleChunks.length || 0}
 					units="WPM"
