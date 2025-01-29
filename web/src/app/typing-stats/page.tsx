@@ -56,6 +56,7 @@ const TypingStatsPage: React.FC = () => {
 				method: 'GET',
 				headers: {
 					'Content-Type': 'application/json',
+                    'Cache-Control': 'no-store',
 				},
 			});
 
@@ -92,6 +93,7 @@ const TypingStatsPage: React.FC = () => {
 				method: 'GET',
 				headers: {
 					'Content-Type': 'application/json',
+                    'Cache-Control': 'no-store',
 				},
 			});
 
