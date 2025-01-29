@@ -69,7 +69,10 @@ export async function GET(request: Request) {
 		const { data, error } = await supabase
 			.from('typing_stats')
 			.select('*')
-			.eq('user_id', user.id);
+			.eq('user_id', user.id)
+			.order('start_timestamp', { ascending: false })
+			.limit(1000);
+
 
 		if (error) {
 			console.error('Supabase error:', error);
