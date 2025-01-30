@@ -52,11 +52,11 @@ const TypingStatsPage: React.FC = () => {
 				return;
 			}
 
-			const response = await fetch('/api/typing-stats/summary', {
+			const response = await fetch('/api/typing-stats/summary?nonce=' + Math.random(), {
 				method: 'GET',
 				headers: {
 					'Content-Type': 'application/json',
-                    'Cache-Control': 'no-store',
+					'Cache-Control': 'no-store',
 				},
 			});
 
@@ -89,11 +89,11 @@ const TypingStatsPage: React.FC = () => {
 				return;
 			}
 
-			const response = await fetch('/api/typing-stats/daily', {
+			const response = await fetch('/api/typing-stats/daily?nonce=' + Math.random(), {
 				method: 'GET',
 				headers: {
 					'Content-Type': 'application/json',
-                    'Cache-Control': 'no-store',
+					'Cache-Control': 'no-store',
 				},
 			});
 
