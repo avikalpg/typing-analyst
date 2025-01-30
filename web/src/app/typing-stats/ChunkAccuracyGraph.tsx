@@ -43,7 +43,7 @@ const ChunkAccuracyGraph: React.FC<{ dailyTypingStats: DailyStats[] } & React.HT
 					label: 'Mean Accuracy',
 					data: dates.map((date) => ({
 						x: new Date(date).getTime(),
-						y: statsByDay[date].mean
+						y: Number(statsByDay[date].mean)
 					})),
 					fill: false,
 					borderColor: graphColor,
@@ -55,7 +55,7 @@ const ChunkAccuracyGraph: React.FC<{ dailyTypingStats: DailyStats[] } & React.HT
 					label: 'Accuracy Range (Upper)',
 					data: dates.map((date) => ({
 						x: new Date(date).getTime(),
-						y: statsByDay[date].mean + statsByDay[date].stdDev
+						y: Number(statsByDay[date].mean) + Number(statsByDay[date].stdDev)
 					})),
 					fill: 'stack',
 					borderColor: 'transparent',
@@ -67,7 +67,7 @@ const ChunkAccuracyGraph: React.FC<{ dailyTypingStats: DailyStats[] } & React.HT
 					label: 'Accuracy Range (Lower)',
 					data: dates.map((date) => ({
 						x: new Date(date).getTime(),
-						y: statsByDay[date].mean - statsByDay[date].stdDev
+						y: Number(statsByDay[date].mean) - Number(statsByDay[date].stdDev)
 					})),
 					fill: '-2',
 					borderColor: 'transparent',
@@ -102,16 +102,28 @@ const ChunkAccuracyGraph: React.FC<{ dailyTypingStats: DailyStats[] } & React.HT
 		plugins: {
 			tooltip: {
 				callbacks: {
+					title: (tooltipItems: TooltipItem<'line'>[]) => {
+						const date = new Date(tooltipItems[0].parsed.x);
+						return date.toLocaleDateString('en-US', {
+							month: 'short',
+							day: 'numeric',
+							year: 'numeric'
+						});
+					},
 					label: (context: TooltipItem<'line'>) => {
 						const chunksCount = (context.dataset as CustomChartDataset).chunksCount?.[context.dataIndex];
 						const datasetIndex = context.datasetIndex;
 						const allDatasets = context.chart.data.datasets;
-						const meanAccuracy = allDatasets[0].data[context.dataIndex] as unknown as { x: Date, y: number };
-						const upperRange = allDatasets[1].data[context.dataIndex] as unknown as { x: Date, y: number };
-						const lowerRange = allDatasets[2].data[context.dataIndex] as unknown as { x: Date, y: number };
+						const meanAccuracy = allDatasets[0].data[context.dataIndex] as { x: number, y: number };
+						const upperRange = allDatasets[1].data[context.dataIndex] as { x: number, y: number };
+						const lowerRange = allDatasets[2].data[context.dataIndex] as { x: number, y: number };
 
-						if (datasetIndex === 0 || datasetIndex === 1 || datasetIndex === 2) {
+						if (datasetIndex === 0) {
 							return `Mean Accuracy: ${meanAccuracy.y.toFixed(1)}% (${lowerRange.y.toFixed(1)}% - ${upperRange.y.toFixed(1)}%) [${chunksCount} chunks]`;
+						} else if (datasetIndex === 1) {
+							return `${upperRange.y.toFixed(1)}% [${chunksCount} chunks]`;
+						} else if (datasetIndex === 2) {
+							return `${lowerRange.y.toFixed(1)}% [${chunksCount} chunks]`;
 						}
 					}
 				}

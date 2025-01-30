@@ -101,6 +101,14 @@ const ChunkWPMGraph: React.FC<{ dailyTypingStats: DailyStats[] } & React.HTMLAtt
 		plugins: {
 			tooltip: {
 				callbacks: {
+					title: (tooltipItems: TooltipItem<'line'>[]) => {
+						const date = new Date(tooltipItems[0].parsed.x);
+						return date.toLocaleDateString('en-US', {
+							month: 'short',
+							day: 'numeric',
+							year: 'numeric'
+						});
+					},
 					label: (context: TooltipItem<'line'>) => {
 						const chunksCount = (context.dataset as CustomChartDataset).chunksCount?.[context.dataIndex];
 						const datasetIndex = context.datasetIndex;
@@ -109,8 +117,12 @@ const ChunkWPMGraph: React.FC<{ dailyTypingStats: DailyStats[] } & React.HTMLAtt
 						const upperRange = allDatasets[1].data[context.dataIndex] as unknown as { x: Date, y: number };
 						const lowerRange = allDatasets[2].data[context.dataIndex] as unknown as { x: Date, y: number };
 
-						if (datasetIndex === 0 || datasetIndex === 1 || datasetIndex === 2) {
-							return `Mean WPM: ${meanWPM.y.toFixed(1)} (${lowerRange.y.toFixed(1)} - ${upperRange.y.toFixed(1)}) [${chunksCount} chunks]`;
+						if (datasetIndex === 0) {
+							return `Mean speed: ${meanWPM.y.toFixed(1)} WPM (range: ${lowerRange.y.toFixed(1)}-${upperRange.y.toFixed(1)} ) [${chunksCount} chunks]`;
+						} else if (datasetIndex === 1) {
+							return `${upperRange.y.toFixed(1)} WPM [${chunksCount} chunks]`;
+						} else if (datasetIndex === 2) {
+							return `${lowerRange.y.toFixed(1)} WPM [${chunksCount} chunks]`;
 						}
 					}
 				}
