@@ -40,11 +40,11 @@ export class ClientApiHelper {
 		} catch (error) {
 			if (axios.isAxiosError(error) && error.response) {
 				if (error.response.status === 401) {
-					console.error('Unauthorized: trying to refresh token');
+					console.error('Unauthorized: trying to refresh token', error);
 					try {
 						const refreshResponse = await axios.post('/api/auth/refresh');
 						if (!refreshResponse.data) {
-							console.error('Failed to refresh token: redirecting to login');
+							console.error('Failed to refresh token: redirecting to login', refreshResponse);
 							window.location.href = '/login';
 							return { data: null, error: new Error('Unauthorized', { cause: 'Failed to refresh token' }) };
 						}
@@ -56,7 +56,7 @@ export class ClientApiHelper {
 
 						return { data: retryResponse.data, error: null };
 					} catch (retryError) {
-						console.error('Failed to fetch data after refreshing token: redirecting to login');
+						console.error('Failed to fetch data after refreshing token: redirecting to login', retryError);
 						window.location.href = '/login';
 						return { data: null, error: new Error('Unauthorized', { cause: 'Failed to fetch data after token refresh' }) };
 					}
