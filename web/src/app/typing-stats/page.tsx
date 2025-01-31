@@ -46,7 +46,6 @@ const TypingStatsPage: React.FC = () => {
 	useEffect(() => {
 		const fetchTypingStatsSummary = async () => {
 			const { data, error } = await ClientApiHelper.get('/api/typing-stats/summary');
-			console.log({ data, error });
 			if (error) {
 				setError(error.message);
 				return;
@@ -60,7 +59,6 @@ const TypingStatsPage: React.FC = () => {
 	useEffect(() => {
 		const fetchTypingStatsTimelineByDay = async () => {
 			const { data, error } = await ClientApiHelper.get('/api/typing-stats/daily');
-			console.log({ data, error });
 			if (error) {
 				setError(error.message);
 				return;
