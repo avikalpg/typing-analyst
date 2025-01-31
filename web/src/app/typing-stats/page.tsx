@@ -7,6 +7,7 @@ import ChunkAccuracyGraph from './ChunkAccuracyGraph';
 import BigNumber from './BigNumber';
 import { DailyStats, SummaryStats } from '../../../types/query.types';
 import { ClientApiHelper } from '@/utils/apiUtils';
+import { NoDataComponent } from '@/components/NoDataComponent';
 
 export type TypingStat = {
 	start_timestamp: string;
@@ -75,6 +76,10 @@ const TypingStatsPage: React.FC = () => {
 
 	if (error) {
 		return <div>Error: {error}</div>;
+	}
+
+	if (!dailyStatsLoading && (dailyStat.length === 0)) {
+		return <NoDataComponent />;
 	}
 
 	return (

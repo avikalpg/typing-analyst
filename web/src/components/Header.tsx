@@ -61,8 +61,18 @@ export default function Header() {
 									<Link
 										href='/typing-stats'
 										className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
+										onClick={() => setIsMenuOpen(false)}
 									>
 										Typing Stats
+									</Link>
+								</li>
+								<li>
+									<Link
+										href='/FAQs'
+										className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
+										onClick={() => setIsMenuOpen(false)}
+									>
+										FAQs
 									</Link>
 								</li>
 								<li>
