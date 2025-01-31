@@ -6,6 +6,7 @@ import ChunkWPMGraph from './ChunkWPMGraph';
 import ChunkAccuracyGraph from './ChunkAccuracyGraph';
 import BigNumber from './BigNumber';
 import { DailyStats, SummaryStats } from '../../../types/query.types';
+import { ClientApiHelper } from '@/utils/apiUtils';
 
 export type TypingStat = {
 	start_timestamp: string;
@@ -44,35 +45,12 @@ const TypingStatsPage: React.FC = () => {
 
 	useEffect(() => {
 		const fetchTypingStatsSummary = async () => {
-			const userId = localStorage.getItem('userId');
-
-			if (!userId) {
-				setError('Unauthorized');
-				window.location.href = '/login';
+			const { data, error } = await ClientApiHelper.get('/api/typing-stats/summary');
+			console.log({ data, error });
+			if (error) {
+				setError(error.message);
 				return;
 			}
-
-			const response = await fetch('/api/typing-stats/summary?nonce=' + Math.random(), {
-				method: 'GET',
-				headers: {
-					'Content-Type': 'application/json',
-					'Cache-Control': 'no-store',
-				},
-			});
-
-			if (!response.ok) {
-				const errorData = await response.json();
-				if (response.status === 401) {
-					setError('Unauthorized');
-					console.error('Unauthorized: redirecting to login');
-					window.location.href = '/login';
-					return;
-				}
-				setError(errorData.error);
-				return;
-			}
-
-			const data: { data: SummaryStats[] } = await response.json();
 			setSummary(data.data[0]);
 		};
 
@@ -81,36 +59,12 @@ const TypingStatsPage: React.FC = () => {
 
 	useEffect(() => {
 		const fetchTypingStatsTimelineByDay = async () => {
-			const userId = localStorage.getItem('userId');
-
-			if (!userId) {
-				setError('Unauthorized');
-				window.location.href = '/login';
+			const { data, error } = await ClientApiHelper.get('/api/typing-stats/daily');
+			console.log({ data, error });
+			if (error) {
+				setError(error.message);
 				return;
 			}
-
-			const response = await fetch('/api/typing-stats/daily?nonce=' + Math.random(), {
-				method: 'GET',
-				headers: {
-					'Content-Type': 'application/json',
-					'Cache-Control': 'no-store',
-				},
-			});
-
-			if (!response.ok) {
-				const errorData = await response.json();
-				if (response.status === 401) {
-					setError('Unauthorized');
-					console.error('Unauthorized: redirecting to login');
-					window.location.href = '/login';
-					return;
-				}
-				setError(errorData.error);
-				return;
-			}
-
-			const data: { data: DailyStats[] } = await response.json();
-			console.log(data.data);
 			setDailyStat(data.data);
 		};
 
