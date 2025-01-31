@@ -18,7 +18,7 @@ export class ClientApiHelper {
 		return axios.post(url, data);
 	}
 
-	static async get(url: string, noCache = false): Promise<{ data: any, error: Error | null }> {
+	static async get<T>(url: string, noCache = false): Promise<{ data: T | null, error: Error | null }> {
 		const userId = localStorage.getItem('userId');
 		const endPointUrl = addParamsToUrl(url, noCache ? { 'nonce': Math.random().toString() } : {});
 		const headers = {
