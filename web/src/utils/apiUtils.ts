@@ -10,7 +10,7 @@ export function addParamsToUrl(url: string, params: Record<string, string>): str
 }
 
 export class ClientApiHelper {
-	private static async handleRequest<T>(method: 'get' | 'post', url: string, data?: any, noCache = false): Promise<{ data: T | null, error: Error | null }> {
+	private static async handleRequest<T, U>(method: 'get' | 'post', url: string, data?: U, noCache = false): Promise<{ data: T | null, error: Error | null }> {
 		const userId = localStorage.getItem('userId');
 		const endPointUrl = addParamsToUrl(url, noCache ? { 'nonce': Math.random().toString() } : {});
 		const headers = {
@@ -68,10 +68,10 @@ export class ClientApiHelper {
 	}
 
 	static async post<T, U>(url: string, data: T, noCache = false): Promise<{ data: U | null, error: Error | null }> {
-		return this.handleRequest<U>('post', url, data, noCache);
+		return this.handleRequest<U, T>('post', url, data, noCache);
 	}
 
 	static async get<T>(url: string, noCache = false): Promise<{ data: T | null, error: Error | null }> {
-		return this.handleRequest<T>('get', url, undefined, noCache);
+		return this.handleRequest<T, never>('get', url, undefined, noCache);
 	}
 }
