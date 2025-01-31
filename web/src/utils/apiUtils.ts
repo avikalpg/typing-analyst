@@ -10,15 +10,7 @@ export function addParamsToUrl(url: string, params: Record<string, string>): str
 }
 
 export class ClientApiHelper {
-	headers = {
-		'Content-Type': 'application/json',
-	};
-
-	static async post(url: string, data: any) {
-		return axios.post(url, data);
-	}
-
-	static async get<T>(url: string, noCache = false): Promise<{ data: T | null, error: Error | null }> {
+	private static async handleRequest<T>(method: 'get' | 'post', url: string, data?: any, noCache = false): Promise<{ data: T | null, error: Error | null }> {
 		const userId = localStorage.getItem('userId');
 		const endPointUrl = addParamsToUrl(url, noCache ? { 'nonce': Math.random().toString() } : {});
 		const headers = {
@@ -32,7 +24,10 @@ export class ClientApiHelper {
 		}
 
 		try {
-			const response = await axios.get(endPointUrl, {
+			const response = await axios({
+				method,
+				url: endPointUrl,
+				data: method === 'post' ? data : undefined,
 				headers: headers,
 			});
 
@@ -50,7 +45,10 @@ export class ClientApiHelper {
 						}
 
 						// try to fetch the data again
-						const retryResponse = await axios.get(endPointUrl, {
+						const retryResponse = await axios({
+							method,
+							url: endPointUrl,
+							data: method === 'post' ? data : undefined,
 							headers: headers,
 						});
 
@@ -67,5 +65,13 @@ export class ClientApiHelper {
 			console.error('An unexpected error occurred:', error);
 			return { data: null, error: new Error('An unexpected error occurred') };
 		}
+	}
+
+	static async post<T, U>(url: string, data: T, noCache = false): Promise<{ data: U | null, error: Error | null }> {
+		return this.handleRequest<U>('post', url, data, noCache);
+	}
+
+	static async get<T>(url: string, noCache = false): Promise<{ data: T | null, error: Error | null }> {
+		return this.handleRequest<T>('get', url, undefined, noCache);
 	}
 }
