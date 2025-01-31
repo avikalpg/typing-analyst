@@ -20,17 +20,17 @@ export default function FAQs() {
 					<p>This app is currently <em>not notarized</em> by Apple. To open the app:</p>
 					<ol className="list-decimal list-inside">
 						<li>Right-click (or Control-click) on the app icon.</li>
-						<li>Select "Open" from the context menu.</li>
-						<li>You'll see a dialog box. Click "Open" again to confirm.</li>
+						<li>Select &quot;Open&quot; from the context menu.</li>
+						<li>You&apos;ll see a dialog box. Click &quot;Open&quot; again to confirm.</li>
 					</ol>
-					<p>Additionally, you will need to manually add this application to the "Input Monitoring" section in the Privacy & Security settings:</p>
+					<p>Additionally, you will need to manually add this application to the &quot;Input Monitoring&quot; section in the Privacy &amp; Security settings:</p>
 					<ol className="list-decimal list-inside">
-						<li>Open "System Settings" (or "System Preferences" on older macOS versions).</li>
-						<li>Go to "Privacy & Security".</li>
-						<li>Select "Input Monitoring".</li>
-						<li>Click the "+" button.</li>
-						<li>Locate and select the application named "Typing Analyst".</li>
-						<li>Click "Open" to grant the permission.</li>
+						<li>Open &quot;System Settings&quot; (or &quot;System Preferences&quot; on older macOS versions).</li>
+						<li>Go to &quot;Privacy &amp; Security&quot;.</li>
+						<li>Select &quot;Input Monitoring&quot;.</li>
+						<li>Click the &quot;+&quot; button.</li>
+						<li>Locate and select the application named &quot;Typing Analyst&quot;.</li>
+						<li>Click &quot;Open&quot; to grant the permission.</li>
 					</ol>
 				</div>
 			</div>
