@@ -46,7 +46,12 @@ To open the app:
 
 1.  Right-click (or Control-click) on the app icon.
 2.  Select "Open" from the context menu.
-3.  You'll see a dialog box. Click "Open" again to confirm.
+3. You'll see a dialog box. If you see an "Open" button, click it to confirm. Otherwise, override Privacy & Security settings:
+   1. On your Mac, choose Apple menu  > System Settings, then click **Privacy & Security** in the sidebar (you may need to scroll down).
+   2. Scroll to the Security section and click **Open Anyway** next to Typing Analyst.
+   3. When the confirmation prompt appears, click **Open**.
+   4. Enter your login password (or use Touch ID), then click **OK**.
+   5. The app is saved as an exception, so you can open it normally next time by double-clicking it like any authorized app.
 
 I plan to notarize the app in the future if there's sufficient interest.
 
@@ -62,6 +67,8 @@ Here's how to do it:
 1. Click the "+" button.
 1. Locate and select the application named "Typing Analyst" by searching it in the finder.<br>*(If you are building the application yourself, it might be located in a directory similar to `~/Library/Developer/Xcode/DerivedData/[YourProjectName]/Build/Products/Debug/`.)*
 1. Click "Open" to grant the permission.
+
+Repeat the same operation for "System Settings" -> "Privacy & Security" -> "Accessibility"
 
 ##  Usage
 
