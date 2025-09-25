@@ -68,6 +68,8 @@ Here's how to do it:
 1. Locate and select the application named "Typing Analyst" by searching it in the finder.<br>*(If you are building the application yourself, it might be located in a directory similar to `~/Library/Developer/Xcode/DerivedData/[YourProjectName]/Build/Products/Debug/`.)*
 1. Click "Open" to grant the permission.
 
+Repeat the same operation for "System Settings" -> "Privacy & Security" -> "Accessibility"
+
 ##  Usage
 
 1.  **Launch the App:** After bypassing Gatekeeper (as described in the Installation section), launch Typing Analyst.
