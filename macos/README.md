@@ -46,13 +46,12 @@ To open the app:
 
 1.  Right-click (or Control-click) on the app icon.
 2.  Select "Open" from the context menu.
-3.  You'll see a dialog box. If you see an "Open" button, click it to confirm. Otherwise, you have to open by manually overriding Privacy & Security settings. Here are the steps:
-	1. On your Mac, choose Apple menu  > System Settings, then click Privacy & Security  in the sidebar. (You may need to scroll down.)
- 	2. Open Privacy & Security settings for me
- 	3. Go to Security, then click Open.
-  	4. Click Open Anyway. This button is available for about an hour after you try to open the app.
-   	5. Enter your login password, then click OK.
-    The app is saved as an exception to your security settings, and you can open it in the future by double-clicking it, just as you can for any authorized app.
+3. You'll see a dialog box. If you see an "Open" button, click it to confirm. Otherwise, override Privacy & Security settings:
+   1. On your Mac, choose Apple menu  > System Settings, then click **Privacy & Security** in the sidebar (you may need to scroll down).
+   2. Scroll to the Security section and click **Open Anyway** next to Typing Analyst.
+   3. When the confirmation prompt appears, click **Open**.
+   4. Enter your login password (or use Touch ID), then click **OK**.
+   5. The app is saved as an exception, so you can open it normally next time by double-clicking it like any authorized app.
 
 I plan to notarize the app in the future if there's sufficient interest.
 
